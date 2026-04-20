@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs grep *)",
+      "Bash(php artisan *)",
+      "Bash(vendor/bin/pint --dirty --format agent)",
+      "Bash(grep -rn \"use App\\\\\\\\\\\\\\\\ActivityType\\\\|use App\\\\\\\\\\\\\\\\PollutantStatus\\\\|use App\\\\\\\\\\\\\\\\ViolationStatus\\\\|use App\\\\\\\\\\\\\\\\ViolationStatus\" app/Models/ app/Services/)",
+      "Bash(grep -rn \"use App\\\\\\\\\\\\\\\\\" app/Models/ app/Services/)",
+      "Bash(grep -v \"App\\\\\\\\\\\\\\\\Models\\\\|App\\\\\\\\\\\\\\\\Enums\\\\|App\\\\\\\\\\\\\\\\Services\\\\|App\\\\\\\\\\\\\\\\Http\")",
+      "Bash(awk '{print $2}')"
+    ]
+  }
+}
