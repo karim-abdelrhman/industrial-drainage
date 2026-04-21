@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['violation_rule_id', 'tier_order', 'duration_months', 'price_per_unit'])]
+#[Fillable(['violation_rule_id', 'tier_order', 'duration_days', 'price_per_unit'])]
 class ViolationRuleTier extends Model
 {
     /** @use HasFactory<ViolationRuleTierFactory> */
@@ -18,6 +18,7 @@ class ViolationRuleTier extends Model
     {
         return [
             'price_per_unit' => 'decimal:4',
+            'duration_days' => 'integer',
         ];
     }
 

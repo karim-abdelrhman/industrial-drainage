@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Pollutants;
 use App\Filament\Resources\Pollutants\Pages\CreatePollutant;
 use App\Filament\Resources\Pollutants\Pages\EditPollutant;
 use App\Filament\Resources\Pollutants\Pages\ListPollutants;
+use App\Filament\Resources\Pollutants\RelationManagers\ViolationRulesRelationManager;
 use App\Filament\Resources\Pollutants\Schemas\PollutantForm;
 use App\Filament\Resources\Pollutants\Tables\PollutantsTable;
 use App\Models\Pollutant;
@@ -39,7 +40,7 @@ class PollutantResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            ViolationRulesRelationManager::class,
         ];
     }
 

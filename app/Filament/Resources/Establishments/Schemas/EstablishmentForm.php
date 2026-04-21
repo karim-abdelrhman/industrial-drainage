@@ -45,9 +45,7 @@ class EstablishmentForm
                             ->label('البريد الإلكتروني')
                             ->email()
                             ->maxLength(150),
-                        Toggle::make('is_active')
-                            ->label('نشط')
-                            ->default(true),
+
                     ])
                     ->columns(2),
             ]);

@@ -28,12 +28,12 @@ class ViolationRuleForm
                             ->label('نوع النشاط')
                             ->options(collect(ActivityType::cases())->mapWithKeys(fn (ActivityType $c) => [$c->value => $c->getLabel()]))
                             ->required(),
-                        TextInput::make('min_value')
-                            ->label('الحد الأدنى للقيمة')
+                        TextInput::make('from')
+                            ->label('من')
                             ->numeric()
                             ->required(),
-                        TextInput::make('max_value')
-                            ->label('الحد الأقصى للقيمة (فارغ = مفتوح)')
+                        TextInput::make('to')
+                            ->label('الي')
                             ->numeric(),
                     ])
                     ->columns(2),

@@ -23,10 +23,10 @@ class ViolationRulesTable
                 TextColumn::make('activity_type')
                     ->label('نوع النشاط')
                     ->badge(),
-                TextColumn::make('min_value')
+                TextColumn::make('from')
                     ->label('من')
                     ->numeric(),
-                TextColumn::make('max_value')
+                TextColumn::make('to')
                     ->label('إلى')
                     ->numeric()
                     ->placeholder('مفتوح'),

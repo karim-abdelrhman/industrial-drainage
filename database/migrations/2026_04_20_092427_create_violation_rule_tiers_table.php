@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('violation_rule_id')->constrained()->cascadeOnDelete();
             $table->tinyInteger('tier_order')->unsigned();
-            $table->tinyInteger('duration_months')->unsigned();
+            $table->tinyInteger('duration_days')->unsigned();
             $table->decimal('price_per_unit', 10, 4);
             $table->timestamps();
 

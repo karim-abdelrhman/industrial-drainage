@@ -12,8 +12,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('pollutant_id')->constrained()->restrictOnDelete();
             $table->string('activity_type', 20);
-            $table->decimal('min_value', 10, 4);
-            $table->decimal('max_value', 10, 4)->nullable();
+            $table->decimal('from', 10, 4);
+            $table->decimal('to', 10, 4)->nullable();
             $table->timestamps();
 
             $table->index(['pollutant_id', 'activity_type'], 'vr_pollutant_activity');

@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['pollutant_id', 'activity_type', 'min_value', 'max_value'])]
+#[Fillable(['pollutant_id', 'activity_type', 'from', 'to'])]
 class ViolationRule extends Model
 {
     /** @use HasFactory<ViolationRuleFactory> */
@@ -20,8 +20,8 @@ class ViolationRule extends Model
     {
         return [
             'activity_type' => ActivityType::class,
-            'min_value' => 'decimal:4',
-            'max_value' => 'decimal:4',
+            'from' => 'decimal:4',
+            'to' => 'decimal:4',
         ];
     }
 
