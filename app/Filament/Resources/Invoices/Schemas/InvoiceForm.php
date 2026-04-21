@@ -35,8 +35,7 @@ class InvoiceForm
                             ->required(),
                         TextInput::make('total_amount')
                             ->label('المبلغ الإجمالي')
-                            ->numeric()
-                            ->readOnly(),
+                            ->numeric(),
                         DatePicker::make('due_date')
                             ->label('تاريخ الاستحقاق'),
                         Textarea::make('notes')

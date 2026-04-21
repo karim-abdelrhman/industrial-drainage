@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['establishment_id', 'billing_month', 'status', 'total_amount', 'issued_at', 'due_date', 'notes'])]
+#[Fillable(['establishment_id', 'sample_id', 'billing_month', 'status', 'total_amount', 'issued_at', 'due_date', 'notes'])]
 class Invoice extends Model
 {
     /** @use HasFactory<InvoiceFactory> */
@@ -31,6 +31,11 @@ class Invoice extends Model
     public function establishment(): BelongsTo
     {
         return $this->belongsTo(Establishment::class);
+    }
+
+    public function sample(): BelongsTo
+    {
+        return $this->belongsTo(Sample::class);
     }
 
     public function items(): HasMany

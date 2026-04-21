@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Establishments;
 use App\Filament\Resources\Establishments\Pages\CreateEstablishment;
 use App\Filament\Resources\Establishments\Pages\EditEstablishment;
 use App\Filament\Resources\Establishments\Pages\ListEstablishments;
+use App\Filament\Resources\Establishments\RelationManagers\SamplesRelationManager;
 use App\Filament\Resources\Establishments\Schemas\EstablishmentForm;
 use App\Filament\Resources\Establishments\Tables\EstablishmentsTable;
 use App\Models\Establishment;
@@ -38,7 +39,9 @@ class EstablishmentResource extends Resource
 
     public static function getRelations(): array
     {
-        return [];
+        return [
+            SamplesRelationManager::class,
+        ];
     }
 
     public static function getPages(): array
