@@ -40,7 +40,6 @@ class SamplesRelationManager extends RelationManager
                 ->schema([
                     TextInput::make('sample_number')
                         ->label('رقم العينة')
-                        ->default(fn () => 'SMP-'.now()->format('Ymd').'-'.str_pad(rand(1, 999), 3, '0', STR_PAD_LEFT))
                         ->required(),
                     DatePicker::make('sample_date')
                         ->label('تاريخ أخذ العينة')
@@ -53,22 +52,21 @@ class SamplesRelationManager extends RelationManager
                 ])
                 ->columns(2),
 
-            Section::make('قراءات الملوثات')
+            Section::make('بيانات الملوثات')
                 ->schema([
                     Repeater::make('readings')
-                        ->label('')
                         ->relationship('readings')
                         ->schema([
                             Select::make('pollutant_id')
                                 ->label('الملوث')
                                 ->options(
                                     Pollutant::where('is_active', true)
-                                        ->pluck('name', 'id')
+                                        ->pluck('code', 'id')
                                 )
                                 ->searchable()
                                 ->required(),
                             TextInput::make('detected_value')
-                                ->label('القيمة المكتشفة')
+                                ->label('تركيز الملوث')
                                 ->numeric()
                                 ->minValue(0)
                                 ->required(),
@@ -77,7 +75,7 @@ class SamplesRelationManager extends RelationManager
                         ->addActionLabel('إضافة ملوث')
                         ->columnSpanFull(),
                 ]),
-        ]);
+        ])->columns(1);
     }
 
     public function table(Table $table): Table
@@ -119,7 +117,7 @@ class SamplesRelationManager extends RelationManager
                     ->modalCancelActionLabel('إغلاق'),
 
                 Action::make('generate_invoice')
-                    ->label('إنشاء فاتورة')
+                    ->label('إنشاء مطالبة')
                     ->icon(Heroicon::OutlinedDocumentText)
                     ->color('success')
                     ->requiresConfirmation()
@@ -183,14 +181,14 @@ class SamplesRelationManager extends RelationManager
         }
 
         $total = number_format($result['total'], 2);
-
+        dd($rows, $total);
         return "<div style='direction:rtl'>
             <table style='width:100%;border-collapse:collapse;font-size:14px'>
                 <thead>
                     <tr style='background:#f3f4f6'>
                         <th style='padding:10px 12px;text-align:right;border-bottom:2px solid #d1d5db'>الملوث</th>
                         <th style='padding:10px 12px;text-align:right;border-bottom:2px solid #d1d5db'>القيمة المكتشفة</th>
-                        <th style='padding:10px 12px;text-align:right;border-bottom:2px solid #d1d5db'>المرحلة</th>
+                        <th style='padding:10px 12px;text-align:right;border-bottom:2px solid #d1dbd5'>المرحلة</th>
                         <th style='padding:10px 12px;text-align:right;border-bottom:2px solid #d1d5db'>السعر/وحدة</th>
                         <th style='padding:10px 12px;text-align:right;border-bottom:2px solid #d1d5db'>الإجمالي الفرعي</th>
                     </tr>

@@ -11,7 +11,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['establishment_id', 'sample_id', 'billing_month', 'status', 'total_amount', 'issued_at', 'due_date', 'notes'])]
+#[
+    Fillable([
+        'establishment_id',
+        'sample_id',
+        'billing_month',
+        'status',
+        'total_amount',
+        'issued_at',
+        'due_date',
+        'notes'
+    ])
+]
 class Invoice extends Model
 {
     /** @use HasFactory<InvoiceFactory> */

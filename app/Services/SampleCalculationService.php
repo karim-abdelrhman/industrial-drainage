@@ -78,9 +78,9 @@ class SampleCalculationService
         return ViolationRule::query()
             ->where('pollutant_id', $pollutantId)
             ->where('activity_type', $activityType)
-            ->where('min_value', '<=', $value)
+            ->where('from', '<=', $value)
             ->where(function ($q) use ($value) {
-                $q->whereNull('max_value')->orWhere('max_value', '>=', $value);
+                $q->whereNull('to')->orWhere('to', '>=', $value);
             })
             ->with('tiers')
             ->first();
