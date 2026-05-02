@@ -28,7 +28,7 @@ class PollutantForm
                             ->maxLength(150),
                         TextInput::make('unit')
                             ->label('الوحدة')
-                            ->required()
+                            ->default('مليجرام/لتر')
                             ->maxLength(30),
                     ]),
             ])->columns(1);

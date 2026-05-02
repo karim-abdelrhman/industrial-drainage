@@ -27,6 +27,7 @@ class InvoiceItem extends Model
     protected function casts(): array
     {
         return [
+            'tier_order' => 'integer',
             'price_per_unit' => 'decimal:4',
             'detected_value' => 'decimal:4',
             'amount' => 'decimal:4',

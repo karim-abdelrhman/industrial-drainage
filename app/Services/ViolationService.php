@@ -4,119 +4,117 @@ namespace App\Services;
 
 use App\Enums\ActivityType;
 use App\Enums\ViolationStatus;
+use App\Models\PollutantLimit;
 use App\Models\Violation;
 use App\Models\ViolationRule;
-use App\Models\ViolationRuleTier;
 use App\Models\ViolationTierStateLog;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class ViolationService
 {
     /**
-     * Find the matching violation rule for a pollutant, value, and activity type.
+     * Find the matching compliant limit for a reading.
+     * Checked before violation rules — boundary values resolve to compliant.
      */
-    public function findRule(int $pollutantId, float $value, ActivityType $activityType): ?ViolationRule
+    public function findLimit(int $pollutantId, float $value, ActivityType $activityType): ?PollutantLimit
     {
-        return ViolationRule::query()
+        return PollutantLimit::query()
             ->where('pollutant_id', $pollutantId)
-            ->where('activity_type', $activityType)
+            ->where('activity_type', $activityType->value)
             ->where('min_value', '<=', $value)
             ->where(function ($query) use ($value) {
-                $query->whereNull('max_value')
-                    ->orWhere('max_value', '>=', $value);
+                $query->whereNull('max_value')->orWhere('max_value', '>=', $value);
             })
             ->first();
     }
 
     /**
-     * Create a new violation starting at tier 1.
+     * Find the matching violation rule for a reading (columns: from / to).
+     * Only called when findLimit returns null.
+     */
+    public function findRule(int $pollutantId, float $value, ActivityType $activityType): ?ViolationRule
+    {
+        return ViolationRule::query()
+            ->where('pollutant_id', $pollutantId)
+            ->where('activity_type', $activityType->value)
+            ->where('from', '<=', $value)
+            ->where(function ($query) use ($value) {
+                $query->whereNull('to')->orWhere('to', '>', $value);
+            })
+            ->with(['tiers' => fn ($q) => $q->orderBy('tier_order')])
+            ->first();
+    }
+
+    /**
+     * Compute which tier applies on a given evaluation date using elapsed days.
+     * Tier 3 (or the last defined tier) is the ceiling — it never escalates beyond it.
      *
-     * @param  array{establishment_id: int, pollutant_id: int, detected_value: float, violation_rule_id: int, start_date: Carbon, last_sample_id?: int}  $data
+     * @param  Violation  $violation  Must have violationRule.tiers loaded.
+     */
+    public function computeTier(Violation $violation, Carbon $evaluationDate): int
+    {
+        $elapsedDays = $violation->start_date->diffInDays($evaluationDate);
+        $durationDays = (int) $violation->violationRule->duration_days;
+        $tiers = $violation->violationRule->tiers->sortBy('tier_order')->values();
+
+        if ($tiers->isEmpty()) {
+            return 1;
+        }
+
+        if ($durationDays <= 0) {
+            return $tiers->first()->tier_order;
+        }
+
+        $tierIndex = min((int) floor($elapsedDays / $durationDays), $tiers->count() - 1);
+
+        return $tiers->get($tierIndex)->tier_order;
+    }
+
+    /**
+     * Create a new active violation starting at tier 1.
+     *
+     * @param  array{establishment_id: int, pollutant_id: int, violation_rule_id: int, detected_value: float, start_date: Carbon, last_sample_id?: int}  $data
      */
     public function createViolation(array $data): Violation
     {
-        return DB::transaction(function () use ($data) {
-            return Violation::create([
-                'establishment_id' => $data['establishment_id'],
-                'pollutant_id' => $data['pollutant_id'],
-                'violation_rule_id' => $data['violation_rule_id'],
-                'detected_value' => $data['detected_value'],
-                'start_date' => $data['start_date'],
-                'current_tier' => 1,
-                'current_tier_start_date' => $data['start_date'],
-                'status' => ViolationStatus::Active,
-                'last_sample_id' => $data['last_sample_id'] ?? null,
-                'last_evaluated_at' => now(),
-            ]);
-        });
+        return Violation::create([
+            'establishment_id' => $data['establishment_id'],
+            'pollutant_id' => $data['pollutant_id'],
+            'violation_rule_id' => $data['violation_rule_id'],
+            'detected_value' => $data['detected_value'],
+            'start_date' => $data['start_date'],
+            'current_tier' => 1,
+            'current_tier_start_date' => $data['start_date'],
+            'status' => ViolationStatus::Active,
+            'last_sample_id' => $data['last_sample_id'] ?? null,
+            'last_evaluated_at' => now(),
+        ]);
     }
 
     /**
-     * Advance a violation to the next tier if the current tier's duration has elapsed.
-     * Returns true if the tier was advanced, logs the transition.
-     */
-    public function advanceTier(Violation $violation): bool
-    {
-        if ($violation->status !== ViolationStatus::Active) {
-            return false;
-        }
-
-        $currentTierModel = $this->getTierModel($violation);
-
-        if ($currentTierModel === null) {
-            return false;
-        }
-
-        $tierEndDate = $violation->current_tier_start_date->copy()->addMonths($currentTierModel->duration_months);
-
-        if (now()->lt($tierEndDate)) {
-            return false;
-        }
-
-        $nextTier = $violation->violationRule->tiers
-            ->firstWhere('tier_order', $violation->current_tier + 1);
-
-        if ($nextTier === null) {
-            return false;
-        }
-
-        DB::transaction(function () use ($violation, $nextTier, $tierEndDate) {
-            ViolationTierStateLog::create([
-                'violation_id' => $violation->id,
-                'previous_tier' => $violation->current_tier,
-                'new_tier' => $nextTier->tier_order,
-                'changed_at' => $tierEndDate,
-            ]);
-
-            $violation->update([
-                'current_tier' => $nextTier->tier_order,
-                'current_tier_start_date' => $tierEndDate,
-            ]);
-        });
-
-        return true;
-    }
-
-    /**
-     * Get the price_per_unit for the violation's current tier.
-     */
-    public function getCurrentTierPrice(Violation $violation): float
-    {
-        return (float) ($this->getTierModel($violation)?->price_per_unit ?? 0);
-    }
-
-    /**
-     * Resolve an active violation.
+     * Resolve an active violation (reading returned to compliant range).
      */
     public function resolve(Violation $violation): void
     {
         $violation->update(['status' => ViolationStatus::Resolved]);
     }
 
-    private function getTierModel(Violation $violation): ?ViolationRuleTier
+    /**
+     * Persist a tier change on the violation and write an audit log entry if the tier changed.
+     */
+    public function syncTier(Violation $violation, int $newTier, Carbon $evaluationDate): void
     {
-        return $violation->violationRule->tiers
-            ->firstWhere('tier_order', $violation->current_tier);
+        if ($violation->current_tier === $newTier) {
+            return;
+        }
+
+        ViolationTierStateLog::create([
+            'violation_id' => $violation->id,
+            'previous_tier' => $violation->current_tier,
+            'new_tier' => $newTier,
+            'changed_at' => $evaluationDate,
+        ]);
+
+        $violation->update(['current_tier' => $newTier]);
     }
 }

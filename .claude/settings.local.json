@@ -7,7 +7,18 @@
       "Bash(grep -rn \"use App\\\\\\\\\\\\\\\\ActivityType\\\\|use App\\\\\\\\\\\\\\\\PollutantStatus\\\\|use App\\\\\\\\\\\\\\\\ViolationStatus\\\\|use App\\\\\\\\\\\\\\\\ViolationStatus\" app/Models/ app/Services/)",
       "Bash(grep -rn \"use App\\\\\\\\\\\\\\\\\" app/Models/ app/Services/)",
       "Bash(grep -v \"App\\\\\\\\\\\\\\\\Models\\\\|App\\\\\\\\\\\\\\\\Enums\\\\|App\\\\\\\\\\\\\\\\Services\\\\|App\\\\\\\\\\\\\\\\Http\")",
-      "Bash(awk '{print $2}')"
+      "Bash(awk '{print $2}')",
+      "Bash(xargs ls *)",
+      "Bash(php -l app/Filament/Resources/Pollutants/RelationManagers/PollutantLimitsRelationManager.php)",
+      "Bash(php -l app/Filament/Resources/Pollutants/RelationManagers/ViolationRulesRelationManager.php)",
+      "Bash(php -l app/Filament/Resources/Pollutants/PollutantResource.php)",
+      "Bash(php -l app/Filament/Resources/Pollutants/Schemas/PollutantForm.php)",
+      "Bash(php -l app/Services/ViolationService.php)",
+      "Bash(php -l app/Models/ViolationRule.php)",
+      "Bash(php -l app/Models/ViolationRuleTier.php)",
+      "Bash(php -l app/Filament/Resources/ViolationRules/Schemas/ViolationRuleForm.php)",
+      "Bash(php -l app/Filament/Resources/ViolationRules/RelationManagers/TiersRelationManager.php)",
+      "Bash(php -l app/Filament/Resources/Establishments/RelationManagers/SamplesRelationManager.php)"
     ]
   }
 }

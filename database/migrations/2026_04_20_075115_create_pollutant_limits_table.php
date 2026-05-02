@@ -14,10 +14,7 @@ return new class extends Migration
             $table->string('activity_type', 20);
             $table->decimal('min_value', 10, 4);
             $table->decimal('max_value', 10, 4)->nullable();
-            $table->string('status', 30);
-            $table->tinyInteger('sort_order')->unsigned()->default(0);
-            $table->date('effective_from');
-            $table->date('effective_to')->nullable();
+            $table->string('status', 30)->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
 

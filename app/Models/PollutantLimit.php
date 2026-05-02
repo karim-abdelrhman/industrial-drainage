@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['pollutant_id', 'activity_type', 'min_value', 'max_value', 'status', 'sort_order', 'effective_from', 'effective_to', 'notes'])]
+#[Fillable(['pollutant_id', 'activity_type', 'min_value', 'max_value', 'price_per_unit', 'status', 'sort_order', 'effective_from', 'effective_to', 'notes'])]
 class PollutantLimit extends Model
 {
     /** @use HasFactory<PollutantLimitFactory> */
@@ -23,6 +23,7 @@ class PollutantLimit extends Model
             'status' => PollutantStatus::class,
             'min_value' => 'decimal:4',
             'max_value' => 'decimal:4',
+            'price_per_unit' => 'decimal:4',
             'effective_from' => 'date',
             'effective_to' => 'date',
         ];

@@ -17,13 +17,15 @@ class TiersRelationManager extends RelationManager
     protected static string $relationship = 'tiers';
 
     protected static ?string $title = 'مراحل المخالفة';
+
     protected static ?string $modelLabel = 'فئة المحاسبة ';
+
     public function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 Section::make()
-                ->columns(3)
+                    ->columns(2)
                     ->schema([
                         TextInput::make('tier_order')
                             ->label('رقم المرحلة')
@@ -36,11 +38,6 @@ class TiersRelationManager extends RelationManager
                                 ignorable: fn ($record) => $record,
                                 modifyRuleUsing: fn ($rule) => $rule->where('violation_rule_id', $this->getOwnerRecord()->id),
                             ),
-                        TextInput::make('duration_days')
-                            ->label('المدة (بالأيام)')
-                            ->numeric()
-                            ->minValue(1)
-                            ->required(),
                         TextInput::make('price_per_unit')
                             ->label('السعر لكل وحدة (بالجنيه)')
                             ->numeric()
@@ -57,12 +54,9 @@ class TiersRelationManager extends RelationManager
             ->defaultSort('tier_order')
             ->columns([
                 TextColumn::make('tier_order')
-                    ->label('المهلة')
+                    ->label('المرحلة')
                     ->badge()
                     ->sortable(),
-                TextColumn::make('duration_days')
-                    ->label('المدة (أيام)')
-                    ->numeric(),
                 TextColumn::make('price_per_unit')
                     ->label('السعر / وحدة')
                     ->money('EGP')

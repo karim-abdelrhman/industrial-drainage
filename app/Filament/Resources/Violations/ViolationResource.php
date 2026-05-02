@@ -24,7 +24,7 @@ class ViolationResource extends Resource
 
     protected static ?string $pluralModelLabel = 'المخالفات';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'الصرف الصناعي';
+    protected static string|\UnitEnum|null $navigationGroup = 'الفوترة';
 
     public static function form(Schema $schema): Schema
     {

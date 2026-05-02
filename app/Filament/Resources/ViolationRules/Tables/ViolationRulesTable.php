@@ -16,7 +16,7 @@ class ViolationRulesTable
     {
         return $table
             ->columns([
-                TextColumn::make('pollutant.name')
+                TextColumn::make('pollutant.code')
                     ->label('الملوث')
                     ->searchable()
                     ->sortable(),

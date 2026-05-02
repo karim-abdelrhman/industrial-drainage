@@ -20,6 +20,10 @@ class InvoicesTable
                     ->label('المنشأة')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('sample.sample_number')
+                    ->label('رقم العينة')
+                    ->searchable()
+                    ->placeholder('—'),
                 TextColumn::make('billing_month')
                     ->label('شهر الفوترة')
                     ->date('Y-m')

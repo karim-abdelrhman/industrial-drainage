@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['establishment_id', 'sample_number', 'sample_date', 'lab_report_image', 'collected_by', 'status', 'notes', 'evaluated_at'])]
+#[Fillable(['establishment_id', 'sample_number', 'sample_date', 'water_usage', 'lab_report_image', 'collected_by', 'status', 'notes', 'evaluated_at'])]
 class Sample extends Model
 {
     /** @use HasFactory<SampleFactory> */
@@ -22,6 +22,7 @@ class Sample extends Model
         return [
             'status' => SampleStatus::class,
             'sample_date' => 'date',
+            'water_usage' => 'decimal:4',
             'evaluated_at' => 'datetime',
         ];
     }

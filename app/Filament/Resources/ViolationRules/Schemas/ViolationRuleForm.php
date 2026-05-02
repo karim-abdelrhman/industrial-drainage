@@ -20,23 +20,31 @@ class ViolationRuleForm
                         Select::make('pollutant_id')
                             ->label('الملوث')
                             ->relationship('pollutant', 'name')
-                            ->getOptionLabelFromRecordUsing(fn (Pollutant $record) => $record->name ?? $record->code)
+                            ->getOptionLabelFromRecordUsing(fn (Pollutant $record) => $record->code ?? $record->name)
                             ->searchable()
                             ->preload()
                             ->required(),
+                        TextInput::make('from')
+                            ->label('الحد الأدنى')
+                            ->numeric()
+                            ->minValue(0)
+                            ->required(),
+                        TextInput::make('to')
+                            ->label('الحد الأقصى (فارغ = مفتوح)')
+                            ->numeric()
+                            ->minValue(0),
                         Select::make('activity_type')
                             ->label('نوع النشاط')
                             ->options(collect(ActivityType::cases())->mapWithKeys(fn (ActivityType $c) => [$c->value => $c->getLabel()]))
                             ->required(),
-                        TextInput::make('from')
-                            ->label('من')
+                        TextInput::make('duration_days')
+                            ->label('مهلة توفيق الأوضاع (أيام)')
                             ->numeric()
-                            ->required(),
-                        TextInput::make('to')
-                            ->label('الي')
-                            ->numeric(),
+                            ->minValue(1)
+                            ->required()
+                            ->helperText('مدة كل مرحلة قبل الانتقال للتالية'),
                     ])
-                    ->columns(2),
-            ]);
+                    ->columns(3),
+            ])->columns(1);
     }
 }

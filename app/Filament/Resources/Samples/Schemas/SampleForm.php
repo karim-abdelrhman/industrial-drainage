@@ -32,6 +32,12 @@ class SampleForm
                         DatePicker::make('sample_date')
                             ->label('تاريخ أخذ العينة')
                             ->required(),
+                        TextInput::make('water_usage')
+                            ->label('الاستخدام المائي (م³)')
+                            ->numeric()
+                            ->minValue(0)
+                            ->step(0.0001)
+                            ->required(),
                         TextInput::make('collected_by')
                             ->label('جُمعت بواسطة')
                             ->maxLength(150),

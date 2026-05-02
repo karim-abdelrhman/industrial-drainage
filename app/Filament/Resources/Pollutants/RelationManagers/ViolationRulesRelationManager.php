@@ -37,7 +37,7 @@ class ViolationRulesRelationManager extends RelationManager
         return $schema
             ->components([
                 Section::make()
-                    ->columns(3)
+                    ->columns(4)
                     ->schema([
                         Select::make('activity_type')
                             ->label('نوع النشاط')
@@ -46,16 +46,16 @@ class ViolationRulesRelationManager extends RelationManager
                         TextInput::make('from')
                             ->label('الحد الأدنى')
                             ->numeric()
-                            ->required()
-                            ->minValue(0),
+                            ->minValue(0)
+                            ->required(),
                         TextInput::make('to')
                             ->label('الحد الأقصى (فارغ = مفتوح)')
                             ->numeric()
                             ->minValue(0)
                             ->rules(
                                 fn (Get $get, ?Model $record): array => [
-                                    function (string $attribute, mixed $value, Closure $fail) use ($get, $record, $ownerRecord): void {
-                                        $minValue = (float) ($get('min_value') ?? 0);
+                                    function (string $_attribute, mixed $value, Closure $fail) use ($get, $record, $ownerRecord): void {
+                                        $minValue = (float) ($get('from') ?? 0);
                                         $activityType = $get('activity_type');
 
                                         if ($value !== null && $value !== '' && (float) $value <= $minValue) {
@@ -73,10 +73,10 @@ class ViolationRulesRelationManager extends RelationManager
                                         $query = ViolationRule::query()
                                             ->where('pollutant_id', $ownerRecord->id)
                                             ->where('activity_type', $activityType)
-                                            ->where('min_value', '<', $maxValue ?? PHP_INT_MAX)
+                                            ->where('from', '<', $maxValue ?? PHP_INT_MAX)
                                             ->where(fn ($q) => $q
-                                                ->whereNull('max_value')
-                                                ->orWhere('max_value', '>', $minValue)
+                                                ->whereNull('to')
+                                                ->orWhere('to', '>', $minValue)
                                             );
 
                                         if ($record?->id) {
@@ -89,6 +89,12 @@ class ViolationRulesRelationManager extends RelationManager
                                     },
                                 ]
                             ),
+                        TextInput::make('duration_days')
+                            ->label('مهلة توفيق الأوضاع (أيام)')
+                            ->numeric()
+                            ->minValue(1)
+                            ->required()
+                            ->helperText('مدة كل مرحلة قبل الانتقال للتالية'),
                     ]),
             ])->columns(1);
     }
@@ -109,6 +115,10 @@ class ViolationRulesRelationManager extends RelationManager
                     ->label('إلى')
                     ->numeric()
                     ->placeholder('مفتوح'),
+                TextColumn::make('duration_days')
+                    ->label('مهلة الأوضاع (يوم)')
+                    ->numeric()
+                    ->sortable(),
                 TextColumn::make('tiers_count')
                     ->label('عدد المراحل')
                     ->counts('tiers')
