@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\InvoiceItemType;
 use Database\Factories\InvoiceItemFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
     'invoice_id',
+    'item_type',
     'violation_id',
     'pollutant_id',
     'violation_rule_id',
@@ -27,6 +29,7 @@ class InvoiceItem extends Model
     protected function casts(): array
     {
         return [
+            'item_type' => InvoiceItemType::class,
             'tier_order' => 'integer',
             'price_per_unit' => 'decimal:4',
             'detected_value' => 'decimal:4',

@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\Establishments\Schemas;
 
 use App\Enums\ActivityType;
+use App\Enums\LocationType;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -25,6 +25,12 @@ class EstablishmentForm
                             ->label('نوع النشاط')
                             ->options(collect(ActivityType::cases())->mapWithKeys(fn (ActivityType $c) => [$c->value => $c->getLabel()]))
                             ->required(),
+                        Select::make('location_type')
+                            ->label('الموقع الجغرافي')
+                            ->options(collect(LocationType::cases())->mapWithKeys(fn (LocationType $c) => [$c->value => $c->getLabel()]))
+                            ->default(LocationType::InsideCity->value)
+                            ->required()
+                            ->helperText('يحدد رسوم جمع العينة (داخل أو خارج النطاق العمراني)'),
                         TextInput::make('address')
                             ->label('العنوان')
                             ->maxLength(300)

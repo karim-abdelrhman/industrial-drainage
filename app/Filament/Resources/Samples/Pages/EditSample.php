@@ -81,6 +81,7 @@ class EditSample extends EditRecord
             'unclassified' => '#9ca3af',
         ];
 
+        // --- Pollutant charge rows ---
         $rows = '';
         foreach ($result['lines'] as $line) {
             $evalLabel = $resultLabels[$line['evaluation_result']] ?? $line['evaluation_result'];
@@ -92,40 +93,78 @@ class EditSample extends EditRecord
 
             $rows .= "
                 <tr>
-                    <td style='padding:10px 14px;border-bottom:1px solid #e5e7eb'>{$line['pollutant_name']}</td>
-                    <td style='padding:10px 14px;border-bottom:1px solid #e5e7eb;text-align:center'>{$value}</td>
-                    <td style='padding:10px 14px;border-bottom:1px solid #e5e7eb;text-align:center'>
+                    <td style='padding:8px 14px;border-bottom:1px solid #e5e7eb'>{$line['pollutant_name']}</td>
+                    <td style='padding:8px 14px;border-bottom:1px solid #e5e7eb;text-align:center'>{$value}</td>
+                    <td style='padding:8px 14px;border-bottom:1px solid #e5e7eb;text-align:center'>
                         <span style='color:{$evalColor};font-weight:600'>{$evalLabel}</span>
                     </td>
-                    <td style='padding:10px 14px;border-bottom:1px solid #e5e7eb;text-align:center'>{$tier}</td>
-                    <td style='padding:10px 14px;border-bottom:1px solid #e5e7eb;text-align:center'>{$price} ج.م</td>
-                    <td style='padding:10px 14px;border-bottom:1px solid #e5e7eb;text-align:center;font-weight:600'>{$amount} ج.م</td>
+                    <td style='padding:8px 14px;border-bottom:1px solid #e5e7eb;text-align:center'>{$tier}</td>
+                    <td style='padding:8px 14px;border-bottom:1px solid #e5e7eb;text-align:center'>{$price} ج.م</td>
+                    <td style='padding:8px 14px;border-bottom:1px solid #e5e7eb;text-align:center;font-weight:600'>{$amount} ج.م</td>
                 </tr>";
         }
 
-        $total = number_format((float) $result['total'], 2);
+        $pollutantSubtotal = number_format((float) ($result['pollutant_subtotal'] ?? array_sum(array_column($result['lines'], 'amount'))), 2);
+
+        $rows .= "
+            <tr style='background:#f9fafb'>
+                <td colspan='5' style='padding:8px 14px;font-weight:600;text-align:right;color:#374151'>إجمالي رسوم الملوثات</td>
+                <td style='padding:8px 14px;font-weight:700;text-align:center;color:#1d4ed8'>{$pollutantSubtotal} ج.م</td>
+            </tr>";
+
+        // --- Fee rows ---
+        $feeRows = '';
+        foreach ($result['fees'] ?? [] as $fee) {
+            $feeAmount = number_format((float) $fee['amount'], 2);
+            $feeNote = htmlspecialchars($fee['notes'] ?? '');
+            $feeLabel = htmlspecialchars($fee['label'] ?? '');
+            $feeRows .= "
+                <tr>
+                    <td style='padding:8px 14px;border-bottom:1px solid #e5e7eb'>{$feeLabel}</td>
+                    <td style='padding:8px 14px;border-bottom:1px solid #e5e7eb;color:#6b7280;font-size:13px'>{$feeNote}</td>
+                    <td style='padding:8px 14px;border-bottom:1px solid #e5e7eb;text-align:center;font-weight:600'>{$feeAmount} ج.م</td>
+                </tr>";
+        }
+
+        $grandTotal = number_format((float) ($result['grand_total'] ?? 0), 2);
 
         return "
             <div style='direction:rtl;font-family:inherit'>
-                <table style='width:100%;border-collapse:collapse;font-size:14px'>
+
+                <h3 style='margin:0 0 8px;font-size:15px;font-weight:700;color:#1f2937;padding:0 4px'>رسوم الملوثات</h3>
+                <table style='width:100%;border-collapse:collapse;font-size:14px;margin-bottom:20px'>
                     <thead>
-                        <tr style='background:#6b7280'>
-                            <th style='padding:10px 14px;text-align:right;border-bottom:2px solid #6b7280;font-weight:700'>الملوث</th>
-                            <th style='padding:10px 14px;text-align:center;border-bottom:2px solid #6b7280;font-weight:700'>القيمة المرصودة</th>
-                            <th style='padding:10px 14px;text-align:center;border-bottom:2px solid #6b7280;font-weight:700'>التصنيف</th>
-                            <th style='padding:10px 14px;text-align:center;border-bottom:2px solid #6b7280;font-weight:700'>المرحلة</th>
-                            <th style='padding:10px 14px;text-align:center;border-bottom:2px solid #6b7280;font-weight:700'>سعر الوحدة</th>
-                            <th style='padding:10px 14px;text-align:center;border-bottom:2px solid #6b7280;font-weight:700'>المبلغ</th>
+                        <tr style='background:#4b5563;color:#fff'>
+                            <th style='padding:9px 14px;text-align:right;font-weight:700'>الملوث</th>
+                            <th style='padding:9px 14px;text-align:center;font-weight:700'>القيمة المرصودة</th>
+                            <th style='padding:9px 14px;text-align:center;font-weight:700'>التصنيف</th>
+                            <th style='padding:9px 14px;text-align:center;font-weight:700'>المرحلة</th>
+                            <th style='padding:9px 14px;text-align:center;font-weight:700'>سعر الوحدة</th>
+                            <th style='padding:9px 14px;text-align:center;font-weight:700'>المبلغ</th>
                         </tr>
                     </thead>
                     <tbody>{$rows}</tbody>
-                    <tfoot>
-                        <tr style='background:#f9fafb'>
-                            <td colspan='5' style='padding:12px 14px;font-weight:700;text-align:right;font-size:15px'>الإجمالي</td>
-                            <td style='padding:12px 14px;font-weight:700;color:#16a34a;text-align:center;font-size:15px'>{$total} ج.م</td>
-                        </tr>
-                    </tfoot>
                 </table>
+
+                <h3 style='margin:0 0 8px;font-size:15px;font-weight:700;color:#1f2937;padding:0 4px'>الرسوم الإضافية</h3>
+                <table style='width:100%;border-collapse:collapse;font-size:14px;margin-bottom:20px'>
+                    <thead>
+                        <tr style='background:#4b5563;color:#fff'>
+                            <th style='padding:9px 14px;text-align:right;font-weight:700'>البند</th>
+                            <th style='padding:9px 14px;text-align:right;font-weight:700'>تفاصيل</th>
+                            <th style='padding:9px 14px;text-align:center;font-weight:700'>المبلغ</th>
+                        </tr>
+                    </thead>
+                    <tbody>{$feeRows}</tbody>
+                </table>
+
+                <table style='width:100%;border-collapse:collapse;font-size:15px'>
+                    <tr style='background:#1d4ed8;color:#fff'>
+                        <td style='padding:14px;font-weight:700;text-align:right;font-size:16px'>الإجمالي النهائي</td>
+                        <td style='padding:14px;font-weight:700;text-align:center;font-size:18px'>{$grandTotal} ج.م</td>
+                    </tr>
+                </table>
+
             </div>";
     }
 }

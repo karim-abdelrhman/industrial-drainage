@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Establishments\RelationManagers;
 
 use App\Enums\SampleStatus;
+use App\Enums\SampleType;
 use App\Filament\Resources\Invoices\InvoiceResource;
 use App\Filament\Resources\Samples\Pages\EditSample;
 use App\Models\Invoice;
@@ -53,6 +54,12 @@ class SamplesRelationManager extends RelationManager
                         ->minValue(0)
                         ->step(0.0001)
                         ->required(),
+                    Select::make('sample_type')
+                        ->label('نوع العينة')
+                        ->options(collect(SampleType::cases())->mapWithKeys(fn (SampleType $c) => [$c->value => $c->getLabel()]))
+                        ->default(SampleType::Regular->value)
+                        ->required()
+                        ->helperText('المركبة: 1400 ج.م — العادية: تبعًا لموقع المنشأة'),
                     TextInput::make('collected_by')
                         ->label('جُمعت بواسطة')
                         ->maxLength(150),

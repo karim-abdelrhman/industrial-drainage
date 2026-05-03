@@ -16,7 +16,7 @@ class ViolationsTable
     {
         return $table
             ->columns([
-                TextColumn::make('establishment_id')
+                TextColumn::make('establishment.name')
                     ->label('رقم المنشأة')
                     ->sortable()
                     ->searchable(),

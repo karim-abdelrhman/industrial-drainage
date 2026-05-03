@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\InvoiceItemType;
 use App\Enums\InvoiceStatus;
 use App\Enums\SampleStatus;
 use App\Enums\ViolationStatus;
@@ -19,7 +20,8 @@ class SampleEvaluationService
     private const WASTEWATER_COEFFICIENT = 0.80;
 
     public function __construct(
-        private readonly ViolationService $violationService
+        private readonly ViolationService $violationService,
+        private readonly FeeCalculationService $feeCalculationService,
     ) {}
 
     /**
@@ -47,18 +49,24 @@ class SampleEvaluationService
             $invoice->items()->delete();
             $sample->violationSnapshots()->delete();
 
-            $totalAmount = 0;
+            $pollutantSubtotal = 0.0;
 
             foreach ($sample->readings as $reading) {
                 [$amount, $snapshotData, $itemData] = $this->processReading($sample, $reading);
 
                 SampleViolationSnapshot::create($snapshotData);
-                $invoice->items()->create($itemData);
+                $invoice->items()->create(array_merge($itemData, ['item_type' => InvoiceItemType::PollutantCharge->value]));
 
-                $totalAmount += $amount;
+                $pollutantSubtotal += $amount;
             }
 
-            $invoice->update(['total_amount' => $totalAmount]);
+            $fees = $this->feeCalculationService->calculate($sample, $pollutantSubtotal);
+
+            foreach ($fees['items'] as $feeItem) {
+                $invoice->items()->create($feeItem);
+            }
+
+            $invoice->update(['total_amount' => $fees['grand_total']]);
 
             $sample->update([
                 'status' => SampleStatus::Evaluated,
@@ -212,7 +220,7 @@ class SampleEvaluationService
             'price_per_unit' => 0,
             'detected_value' => $reading->detected_value,
             'amount' => 0,
-            'notes' => 'Reading does not match any configured limit or violation rule.',
+            'notes' => 'لا يوجد حد مطابقة أو قاعدة مخالفة مرتبطة بهذا الملوث.',
         ];
 
         return [0, $snapshot, $item];

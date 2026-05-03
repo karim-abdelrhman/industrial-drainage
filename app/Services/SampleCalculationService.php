@@ -14,28 +14,37 @@ class SampleCalculationService
     private const WASTEWATER_COEFFICIENT = 0.80;
 
     public function __construct(
-        private readonly ViolationService $violationService
+        private readonly ViolationService $violationService,
+        private readonly FeeCalculationService $feeCalculationService,
     ) {}
 
     /**
      * Preview the full cost breakdown for a sample without persisting anything.
      *
-     * @return array{lines: list<array{pollutant_id: int, pollutant_name: string, unit: string, detected_value: float, evaluation_result: string, tier_order: int|null, price_per_unit: float, amount: float}>, total: float}
+     * @return array{lines: list<array<string, mixed>>, pollutant_subtotal: float, fees: list<array<string, mixed>>, total_fees: float, grand_total: float}
      */
     public function calculateSample(Sample $sample): array
     {
         $sample->loadMissing(['readings.pollutant', 'establishment']);
 
         $lines = [];
-        $total = 0.0;
+        $pollutantSubtotal = 0.0;
 
         foreach ($sample->readings as $reading) {
             $line = $this->calculateReading($reading, $sample->sample_date, (float) $sample->water_usage, $sample->establishment->activity_type, $sample->establishment_id);
-            $total += $line['amount'];
+            $pollutantSubtotal += $line['amount'];
             $lines[] = $line;
         }
 
-        return ['lines' => $lines, 'total' => $total];
+        $feePreview = $this->feeCalculationService->preview($sample, $pollutantSubtotal);
+
+        return [
+            'lines' => $lines,
+            'pollutant_subtotal' => $pollutantSubtotal,
+            'fees' => $feePreview['lines'],
+            'total_fees' => $feePreview['total_fees'],
+            'grand_total' => $feePreview['grand_total'],
+        ];
     }
 
     /**
@@ -85,8 +94,6 @@ class SampleCalculationService
             ];
         }
 
-        // For an existing active violation use its start_date to compute the correct tier.
-        // For a new violation (first sample), assume tier 1.
         $existingViolation = Violation::query()
             ->where('establishment_id', $establishmentId)
             ->where('pollutant_id', $reading->pollutant_id)

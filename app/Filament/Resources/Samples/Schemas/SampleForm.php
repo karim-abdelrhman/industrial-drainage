@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Samples\Schemas;
 
 use App\Enums\SampleStatus;
+use App\Enums\SampleType;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -38,6 +39,12 @@ class SampleForm
                             ->minValue(0)
                             ->step(0.0001)
                             ->required(),
+                        Select::make('sample_type')
+                            ->label('نوع العينة')
+                            ->options(collect(SampleType::cases())->mapWithKeys(fn (SampleType $c) => [$c->value => $c->getLabel()]))
+                            ->default(SampleType::Regular->value)
+                            ->required()
+                            ->helperText('المركبة: 1400 ج.م — العادية: تبعًا لموقع المنشأة'),
                         TextInput::make('collected_by')
                             ->label('جُمعت بواسطة')
                             ->maxLength(150),
