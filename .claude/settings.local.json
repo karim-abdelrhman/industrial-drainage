@@ -19,7 +19,8 @@
       "Bash(php -l app/Filament/Resources/ViolationRules/Schemas/ViolationRuleForm.php)",
       "Bash(php -l app/Filament/Resources/ViolationRules/RelationManagers/TiersRelationManager.php)",
       "Bash(php -l app/Filament/Resources/Establishments/RelationManagers/SamplesRelationManager.php)",
-      "Bash(php -l /home/karim/industrial-drainage/app/Services/SampleEvaluationService.php)"
+      "Bash(php -l /home/karim/industrial-drainage/app/Services/SampleEvaluationService.php)",
+      "Bash(grep \"\\\\.php$\")"
     ]
   }
 }

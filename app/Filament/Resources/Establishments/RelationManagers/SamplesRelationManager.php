@@ -81,7 +81,11 @@ class SamplesRelationManager extends RelationManager
                                 ->options(
                                     Pollutant::where('is_active', true)
                                         ->get()
-                                        ->mapWithKeys(fn (Pollutant $p) => [$p->id => "{$p->name} ({$p->code}) - {$p->unit}"])
+                                        ->mapWithKeys(
+                                            fn (Pollutant $p) => [
+                                                $p->id => "({$p->code}) - {$p->unit}",
+                                            ]
+                                        )
                                 )
                                 ->searchable()
                                 ->required(),
@@ -137,7 +141,6 @@ class SamplesRelationManager extends RelationManager
                                 '<p class="text-center text-gray-500 py-6">يجب إدخال الاستخدام المائي وإضافة قراءات الملوثات أولًا.</p>'
                             );
                         }
-
                         $result = app(SampleCalculationService::class)->calculateSample($record);
 
                         return new HtmlString(EditSample::buildBreakdownHtml($result));
