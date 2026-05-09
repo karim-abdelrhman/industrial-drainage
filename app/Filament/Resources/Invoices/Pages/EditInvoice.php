@@ -57,6 +57,13 @@ class EditInvoice extends EditRecord
                         ->send();
                 }),
 
+            Action::make('print_invoice')
+                ->label('طباعة المطالبة')
+                ->icon(Heroicon::OutlinedPrinter)
+                ->color('gray')
+                ->url(fn (): string => route('invoices.print', $this->getRecord()))
+                ->openUrlInNewTab(),
+
             DeleteAction::make()
                 ->visible(fn (): bool => $this->getRecord()->status === InvoiceStatus::Draft),
         ];

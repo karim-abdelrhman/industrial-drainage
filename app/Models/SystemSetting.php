@@ -26,4 +26,11 @@ class SystemSetting extends Model
 
         return $setting ? (float) $setting->value : $default;
     }
+
+    public static function getString(string $key, string $default = ''): string
+    {
+        $setting = static::find($key);
+
+        return $setting ? (string) $setting->value : $default;
+    }
 }

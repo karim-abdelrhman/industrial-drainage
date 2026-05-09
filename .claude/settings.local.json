@@ -20,7 +20,12 @@
       "Bash(php -l app/Filament/Resources/ViolationRules/RelationManagers/TiersRelationManager.php)",
       "Bash(php -l app/Filament/Resources/Establishments/RelationManagers/SamplesRelationManager.php)",
       "Bash(php -l /home/karim/industrial-drainage/app/Services/SampleEvaluationService.php)",
-      "Bash(grep \"\\\\.php$\")"
+      "Bash(grep \"\\\\.php$\")",
+      "Bash(xargs cat)",
+      "Bash(unzip -o /tmp/Cairo.zip -d /tmp/Cairo/)",
+      "Read(//tmp/**)",
+      "Bash(composer search *)",
+      "Bash(vendor/bin/pint --dirty --format agent app/Http/Controllers/InvoicePrintController.php)"
     ]
   }
 }

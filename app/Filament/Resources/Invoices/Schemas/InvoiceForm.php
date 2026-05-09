@@ -40,9 +40,8 @@ class InvoiceForm
                             ->label('تاريخ الاستحقاق'),
                         Textarea::make('notes')
                             ->label('ملاحظات')
-                            ->columnSpanFull(),
-                    ])
-                    ->columns(2),
-            ]);
+                    ])->columns(3)
+                    ,
+            ])->columns(1);
     }
 }
