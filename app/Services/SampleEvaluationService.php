@@ -93,7 +93,7 @@ class SampleEvaluationService
             return $this->handleCompliant($sample, $reading, $limit);
         }
 
-        $rule = $this->violationService->findRule($reading->pollutant_id, $value, $activityType);
+        $rule = $this->violationService->findRule($reading->pollutant_id, $value);
 
         if ($rule !== null) {
             return $this->handleViolation($sample, $reading, $rule);

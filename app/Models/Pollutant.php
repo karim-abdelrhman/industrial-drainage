@@ -28,4 +28,9 @@ class Pollutant extends Model
     {
         return $this->hasMany(ViolationRule::class);
     }
+
+    public function violations(): HasMany
+    {
+        return $this->hasMany(Violation::class);
+    }
 }

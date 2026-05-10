@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\ViolationRules\Tables;
 
-use App\Enums\ActivityType;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -20,9 +19,6 @@ class ViolationRulesTable
                     ->label('الملوث')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('activity_type')
-                    ->label('نوع النشاط')
-                    ->badge(),
                 TextColumn::make('from')
                     ->label('من')
                     ->numeric(),
@@ -37,9 +33,6 @@ class ViolationRulesTable
                     ->color('info'),
             ])
             ->filters([
-                SelectFilter::make('activity_type')
-                    ->label('نوع النشاط')
-                    ->options(collect(ActivityType::cases())->mapWithKeys(fn (ActivityType $c) => [$c->value => $c->getLabel()])),
                 SelectFilter::make('pollutant_id')
                     ->label('الملوث')
                     ->relationship('pollutant', 'name'),

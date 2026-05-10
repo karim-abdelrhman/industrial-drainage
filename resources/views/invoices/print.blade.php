@@ -415,7 +415,7 @@
             {{-- ── Pollutant rows ── --}}
             @forelse ($pollutantItems as $idx => $item)
                 @php
-                    $pollutantName = $item->pollutant?->name ?? '—';
+                    $pollutantName = $item->pollutant?->code ?? '—';
                     $detectedVal   = number_format((float) $item->detected_value, 2);
                     $tierOrder     = $item->tier_order ?? '—';
                     $pricePerUnit  = number_format((float) $item->price_per_unit, 2);
@@ -476,17 +476,17 @@
         <tbody>
             <tr>
                 <td>
-                    <div class="sig-title">رئيس قطاع الصرف الصناعي</div>
+                    <div class="sig-title">مسئول الصرف الصناعي</div>
                     <div class="sig-name">{{ $industrialManager }}</div>
                     <div class="sig-space"></div>
                 </td>
                 <td>
-                    <div class="sig-title">رئيس القطاع التجاري</div>
+                    <div class="sig-title">عضو تجاري</div>
                     <div class="sig-name">{{ $commercialManager }}</div>
                     <div class="sig-space"></div>
                 </td>
                 <td>
-                    <div class="sig-title">مدير المعامل</div>
+                    <div class="sig-title">مدير إدارة الصرف الصناعي</div>
                     <div class="sig-name">{{ $labManager }}</div>
                     <div class="sig-space"></div>
                 </td>

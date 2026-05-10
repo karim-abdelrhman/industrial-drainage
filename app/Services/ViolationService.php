@@ -32,11 +32,10 @@ class ViolationService
      * Find the matching violation rule for a reading (columns: from / to).
      * Only called when findLimit returns null.
      */
-    public function findRule(int $pollutantId, float $value, ActivityType $activityType): ?ViolationRule
+    public function findRule(int $pollutantId, float $value): ?ViolationRule
     {
         return ViolationRule::query()
             ->where('pollutant_id', $pollutantId)
-            ->where('activity_type', $activityType->value)
             ->where('from', '<=', $value)
             ->where(function ($query) use ($value) {
                 $query->whereNull('to')->orWhere('to', '>', $value);

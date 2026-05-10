@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Pollutants\RelationManagers;
 
-use App\Enums\ActivityType;
 use App\Filament\Resources\ViolationRules\ViolationRuleResource;
 use App\Models\ViolationRule;
 use Closure;
@@ -10,7 +9,6 @@ use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Section;
@@ -18,7 +16,6 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 
@@ -37,12 +34,8 @@ class ViolationRulesRelationManager extends RelationManager
         return $schema
             ->components([
                 Section::make()
-                    ->columns(4)
+                    ->columns(3)
                     ->schema([
-                        Select::make('activity_type')
-                            ->label('نوع النشاط')
-                            ->options(collect(ActivityType::cases())->mapWithKeys(fn (ActivityType $c) => [$c->value => $c->getLabel()]))
-                            ->required(),
                         TextInput::make('from')
                             ->label('الحد الأدنى')
                             ->numeric()
@@ -56,7 +49,6 @@ class ViolationRulesRelationManager extends RelationManager
                                 fn (Get $get, ?Model $record): array => [
                                     function (string $_attribute, mixed $value, Closure $fail) use ($get, $record, $ownerRecord): void {
                                         $minValue = (float) ($get('from') ?? 0);
-                                        $activityType = $get('activity_type');
 
                                         if ($value !== null && $value !== '' && (float) $value <= $minValue) {
                                             $fail('يجب أن يكون الحد الأقصى أكبر من الحد الأدنى.');
@@ -64,15 +56,10 @@ class ViolationRulesRelationManager extends RelationManager
                                             return;
                                         }
 
-                                        if (! $activityType) {
-                                            return;
-                                        }
-
                                         $maxValue = ($value !== null && $value !== '') ? (float) $value : null;
 
                                         $query = ViolationRule::query()
                                             ->where('pollutant_id', $ownerRecord->id)
-                                            ->where('activity_type', $activityType)
                                             ->where('from', '<', $maxValue ?? PHP_INT_MAX)
                                             ->where(fn ($q) => $q
                                                 ->whereNull('to')
@@ -84,7 +71,7 @@ class ViolationRulesRelationManager extends RelationManager
                                         }
 
                                         if ($query->exists()) {
-                                            $fail('يوجد تداخل في نطاق القيم مع قاعدة أخرى لنفس الملوث ونوع النشاط.');
+                                            $fail('يوجد تداخل في نطاق القيم مع قاعدة أخرى لنفس الملوث.');
                                         }
                                     },
                                 ]
@@ -102,17 +89,14 @@ class ViolationRulesRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('activity_type')
-            ->defaultSort('activity_type')
+            ->recordTitleAttribute('from')
+            ->defaultSort('from')
             ->columns([
-                TextColumn::make('activity_type')
-                    ->label('نوع النشاط')
-                    ->badge(),
                 TextColumn::make('from')
-                    ->label('من')
+                    ->label('من (مليجرام/لتر)')
                     ->numeric(),
                 TextColumn::make('to')
-                    ->label('إلى')
+                    ->label('إلى (مليجرام/لتر)')
                     ->numeric()
                     ->placeholder('مفتوح'),
                 TextColumn::make('duration_days')
@@ -125,11 +109,7 @@ class ViolationRulesRelationManager extends RelationManager
                     ->badge()
                     ->color('info'),
             ])
-            ->filters([
-                SelectFilter::make('activity_type')
-                    ->label('نوع النشاط')
-                    ->options(collect(ActivityType::cases())->mapWithKeys(fn (ActivityType $c) => [$c->value => $c->getLabel()])),
-            ])
+            ->filters([])
             ->headerActions([
                 CreateAction::make(),
             ])

@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\ViolationRules\Schemas;
 
-use App\Enums\ActivityType;
 use App\Models\Pollutant;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -33,10 +32,6 @@ class ViolationRuleForm
                             ->label('الحد الأقصى (فارغ = مفتوح)')
                             ->numeric()
                             ->minValue(0),
-                        Select::make('activity_type')
-                            ->label('نوع النشاط')
-                            ->options(collect(ActivityType::cases())->mapWithKeys(fn (ActivityType $c) => [$c->value => $c->getLabel()]))
-                            ->required(),
                         TextInput::make('duration_days')
                             ->label('مهلة توفيق الأوضاع (أيام)')
                             ->numeric()
@@ -44,7 +39,7 @@ class ViolationRuleForm
                             ->required()
                             ->helperText('مدة كل مرحلة قبل الانتقال للتالية'),
                     ])
-                    ->columns(3),
+                    ->columns(4),
             ])->columns(1);
     }
 }
