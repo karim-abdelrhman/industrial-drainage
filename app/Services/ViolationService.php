@@ -34,7 +34,7 @@ class ViolationService
      */
     public function findRule(int $pollutantId, float $value): ?ViolationRule
     {
-        return ViolationRule::query()
+        $rule =  ViolationRule::query()
             ->where('pollutant_id', $pollutantId)
             ->where('from', '<=', $value)
             ->where(function ($query) use ($value) {
@@ -42,6 +42,7 @@ class ViolationService
             })
             ->with(['tiers' => fn ($q) => $q->orderBy('tier_order')])
             ->first();
+        return $rule;
     }
 
     /**

@@ -23,9 +23,9 @@ class PollutantLimitsRelationManager extends RelationManager
 {
     protected static string $relationship = 'limits';
 
-    protected static ?string $title = 'حدود الامتثال';
+    protected static ?string $title = 'المطابقة';
 
-    protected static ?string $modelLabel = 'حد امتثال';
+    protected static ?string $modelLabel = 'حد المطابقة';
 
     public function form(Schema $schema): Schema
     {

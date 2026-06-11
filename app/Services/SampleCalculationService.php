@@ -100,7 +100,7 @@ class SampleCalculationService
             ->where('status', ViolationStatus::Active)
             ->with(['violationRule.tiers'])
             ->first();
-
+        
         if ($existingViolation !== null) {
             $tierOrder = $this->violationService->computeTier($existingViolation, $evaluationDate);
         } else {

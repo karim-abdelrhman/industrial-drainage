@@ -23,9 +23,9 @@ class ViolationRulesRelationManager extends RelationManager
 {
     protected static string $relationship = 'violationRules';
 
-    protected static ?string $title = 'قواعد المخالفات';
+    protected static ?string $title = 'أعباء المعالجة';
 
-    protected static ?string $modelLabel = 'قاعدة مخالفة';
+    protected static ?string $modelLabel = 'اعباء';
 
     public function form(Schema $schema): Schema
     {
