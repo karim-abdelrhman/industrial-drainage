@@ -1,0 +1,37 @@
+/* Photo: Siyavash Lolo / Unsplash — https://unsplash.com/photos/LIBF5SFm5ww */
+
+.fi-body {
+    background-color: transparent !important;
+    background-image:
+        linear-gradient(rgba(18, 24, 38, 0.88), rgba(15, 20, 32, 0.92)),
+        url('../images/water-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+.fi {
+    --gray-800: oklch(0.36 0.016 255);
+    --gray-900: oklch(0.3 0.014 255);
+    --gray-950: oklch(0.21 0.012 255);
+}
+
+.fi-layout,
+.fi-main-ctn,
+.fi-simple-layout,
+.fi-simple-main-ctn,
+.fi-page,
+.fi-simple-page {
+    background-color: transparent !important;
+    background-image: none !important;
+}
+
+.fi-section:not(.fi-section-not-contained):not(.fi-aside),
+.fi-section.fi-aside > .fi-section-content-ctn,
+.fi-ta-ctn,
+.fi-wi-stats-overview-stat,
+.fi-simple-main {
+    background-color: color-mix(in oklab, var(--gray-900) 94%, transparent) !important;
+    backdrop-filter: blur(6px);
+}
