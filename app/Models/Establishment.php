@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ActivityType;
+use App\Enums\CustomerZone;
 use App\Enums\LocationType;
 use Database\Factories\EstablishmentFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'activity_type', 'location_type', 'address', 'contact_person', 'phone', 'email', 'is_active'])]
+#[Fillable(['name', 'activity_type', 'location_type', 'customer_zone', 'address', 'contact_person', 'phone', 'email', 'is_active'])]
 class Establishment extends Model
 {
     /** @use HasFactory<EstablishmentFactory> */
@@ -22,6 +23,7 @@ class Establishment extends Model
         return [
             'activity_type' => ActivityType::class,
             'location_type' => LocationType::class,
+            'customer_zone' => CustomerZone::class,
             'is_active' => 'boolean',
         ];
     }

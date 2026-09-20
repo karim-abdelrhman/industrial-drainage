@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources\Pollutants\RelationManagers;
 
-use App\Enums\ActivityType;
+use App\Enums\CustomerZone;
 use App\Models\PollutantLimit;
+use App\Support\InclusiveBoundToggles;
+use App\Support\NumericInterval;
 use Closure;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -35,54 +37,51 @@ class PollutantLimitsRelationManager extends RelationManager
             Section::make()
                 ->columns(4)
                 ->schema([
-                    Select::make('activity_type')
-                        ->label('نوع النشاط')
-                        ->options(collect(ActivityType::cases())->mapWithKeys(fn (ActivityType $c) => [$c->value => $c->getLabel()]))
+                    Select::make('customer_zone')
+                        ->label('منطقة العميل')
+                        ->options(collect(CustomerZone::cases())->mapWithKeys(fn (CustomerZone $c) => [$c->value => $c->getLabel()]))
                         ->required(),
 
                     TextInput::make('min_value')
                         ->label('الحد الأدنى')
                         ->numeric()
-                        ->minValue(0)
                         ->required(),
 
                     TextInput::make('max_value')
                         ->label('الحد الأقصى (فارغ = مفتوح)')
                         ->numeric()
-                        ->minValue(0)
                         ->rules(
                             fn (Get $get, ?Model $record): array => [
                                 function (string $attribute, mixed $value, Closure $fail) use ($get, $record, $ownerRecord): void {
                                     $minValue = (float) ($get('min_value') ?? 0);
-                                    $activityType = $get('activity_type');
+                                    $customerZone = $get('customer_zone');
 
-                                    if ($value !== null && $value !== '' && (float) $value <= $minValue) {
-                                        $fail('يجب أن يكون الحد الأقصى أكبر من الحد الأدنى.');
+                                    if ($value !== null && $value !== '' && (float) $value < $minValue) {
+                                        $fail('يجب أن يكون الحد الأقصى أكبر من أو يساوي الحد الأدنى.');
 
                                         return;
                                     }
 
-                                    if (! $activityType) {
+                                    if (! $customerZone) {
                                         return;
                                     }
 
-                                    $maxValue = ($value !== null && $value !== '') ? (float) $value : null;
+                                    $candidate = new NumericInterval(
+                                        $minValue,
+                                        (bool) $get('min_inclusive'),
+                                        ($value !== null && $value !== '') ? (float) $value : null,
+                                        (bool) $get('max_inclusive'),
+                                    );
 
-                                    $query = PollutantLimit::query()
+                                    $overlaps = PollutantLimit::query()
                                         ->where('pollutant_id', $ownerRecord->id)
-                                        ->where('activity_type', $activityType)
-                                        ->where('min_value', '<=', $maxValue ?? PHP_INT_MAX)
-                                        ->where(fn ($q) => $q
-                                            ->whereNull('max_value')
-                                            ->orWhere('max_value', '>=', $minValue)
-                                        );
+                                        ->where('customer_zone', $customerZone)
+                                        ->when($record?->id, fn ($query) => $query->where('id', '!=', $record->id))
+                                        ->get()
+                                        ->contains(fn (PollutantLimit $limit) => $limit->interval()->overlaps($candidate));
 
-                                    if ($record?->id) {
-                                        $query->where('id', '!=', $record->id);
-                                    }
-
-                                    if ($query->exists()) {
-                                        $fail('يوجد تداخل في نطاق القيم مع حد امتثال آخر لنفس الملوث ونوع النشاط.');
+                                    if ($overlaps) {
+                                        $fail('يوجد تداخل في نطاق القيم مع حد امتثال آخر لنفس الملوث ومنطقة العميل.');
                                     }
                                 },
                             ]
@@ -93,6 +92,9 @@ class PollutantLimitsRelationManager extends RelationManager
                         ->numeric()
                         ->minValue(0)
                         ->required(),
+
+                    InclusiveBoundToggles::lower('min_inclusive')->default(true),
+                    InclusiveBoundToggles::upper('max_inclusive')->default(true),
                 ]),
         ])->columns(1);
     }
@@ -100,27 +102,26 @@ class PollutantLimitsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('activity_type')
-            ->defaultSort('activity_type')
+            ->recordTitleAttribute('customer_zone')
+            ->defaultSort('customer_zone')
             ->columns([
-                TextColumn::make('activity_type')
-                    ->label('نوع النشاط')
+                TextColumn::make('customer_zone')
+                    ->label('منطقة العميل')
                     ->badge(),
                 TextColumn::make('min_value')
-                    ->label('الحد الأدنى')
-                    ->numeric(1),
+                    ->label('من')
+                    ->formatStateUsing(fn ($state, PollutantLimit $record): string => InclusiveBoundToggles::formatLower($state, $record->min_inclusive)),
                 TextColumn::make('max_value')
-                    ->label('الحد الأقصى')
-                    ->numeric(1)
-                    ->placeholder('مفتوح'),
+                    ->label('إلى')
+                    ->formatStateUsing(fn ($state, PollutantLimit $record): string => InclusiveBoundToggles::formatUpper($state, $record->max_inclusive)),
                 TextColumn::make('price_per_unit')
                     ->label('السعر / وحدة')
                     ->money('EGP'),
             ])
             ->filters([
-                SelectFilter::make('activity_type')
-                    ->label('نوع النشاط')
-                    ->options(collect(ActivityType::cases())->mapWithKeys(fn (ActivityType $c) => [$c->value => $c->getLabel()])),
+                SelectFilter::make('customer_zone')
+                    ->label('منطقة العميل')
+                    ->options(collect(CustomerZone::cases())->mapWithKeys(fn (CustomerZone $c) => [$c->value => $c->getLabel()])),
             ])
             ->headerActions([
                 CreateAction::make(),

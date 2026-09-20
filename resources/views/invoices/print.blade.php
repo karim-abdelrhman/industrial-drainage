@@ -423,7 +423,12 @@
                 @endphp
                 <tr>
                     <td>{{ $idx + 1 }}</td>
-                    <td class="col-name">{{ $pollutantName }}</td>
+                    <td class="col-name">
+                        {{ $pollutantName }}
+                        @if ($item->notes)
+                            <br><small>{{ $item->notes }}</small>
+                        @endif
+                    </td>
                     <td>{{ $detectedVal }}</td>
                     <td>غير مطابق</td>
                     <td>{{ number_format($waterUsage, 2) }}</td>

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Establishments\Schemas;
 
 use App\Enums\ActivityType;
+use App\Enums\CustomerZone;
 use App\Enums\LocationType;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -25,6 +26,12 @@ class EstablishmentForm
                             ->label('نوع النشاط')
                             ->options(collect(ActivityType::cases())->mapWithKeys(fn (ActivityType $c) => [$c->value => $c->getLabel()]))
                             ->required(),
+                        Select::make('customer_zone')
+                            ->label('منطقة العميل')
+                            ->options(collect(CustomerZone::cases())->mapWithKeys(fn (CustomerZone $c) => [$c->value => $c->getLabel()]))
+                            ->default(CustomerZone::City->value)
+                            ->required()
+                            ->helperText('يحدد حدود مطابقة الملوثات'),
                         Select::make('location_type')
                             ->label('الموقع الجغرافي')
                             ->options(collect(LocationType::cases())->mapWithKeys(fn (LocationType $c) => [$c->value => $c->getLabel()]))

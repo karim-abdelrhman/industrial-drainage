@@ -3,10 +3,10 @@
 namespace Database\Seeders;
 
 use App\Enums\ActivityType;
+use App\Enums\CustomerZone;
 use App\Enums\InvoiceItemType;
 use App\Enums\InvoiceStatus;
 use App\Enums\LocationType;
-use App\Enums\PollutantStatus;
 use App\Enums\SampleStatus;
 use App\Enums\SampleType;
 use App\Enums\ViolationStatus;
@@ -14,13 +14,11 @@ use App\Models\Establishment;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\Pollutant;
-use App\Models\PollutantLimit;
 use App\Models\Sample;
 use App\Models\SampleReading;
 use App\Models\SystemSetting;
 use App\Models\Violation;
 use App\Models\ViolationRule;
-use App\Models\ViolationRuleTier;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
@@ -30,7 +28,7 @@ class DemoDataSeeder extends Seeder
     {
         $this->seedSystemSettings();
         $pollutants = $this->seedPollutants();
-        $rules = $this->seedViolationRules($pollutants);
+        $rules = $this->loadTariffRules($pollutants);
         $establishments = $this->seedEstablishments();
         $this->seedSamplesAndReadings($establishments, $pollutants);
         $this->seedViolations($establishments, $pollutants, $rules);
@@ -47,6 +45,7 @@ class DemoDataSeeder extends Seeder
             ['key' => 'analysis_fee', 'label' => 'رسوم التحليل', 'value' => '355', 'type' => 'decimal'],
             ['key' => 'issuance_fee', 'label' => 'رسوم الإصدار', 'value' => '0.50', 'type' => 'decimal'],
             ['key' => 'vat_percentage', 'label' => 'نسبة ضريبة القيمة المضافة', 'value' => '14', 'type' => 'decimal'],
+            ['key' => 'cod_discount_when_bod_violation_percent', 'label' => 'خصم COD عند مخالفة BOD', 'value' => '40', 'type' => 'decimal'],
         ];
 
         foreach ($settings as $setting) {
@@ -57,100 +56,45 @@ class DemoDataSeeder extends Seeder
     /** @return array<string, Pollutant> */
     private function seedPollutants(): array
     {
-        $data = [
-            'bod' => ['code' => 'BOD5', 'name' => 'الطلب البيولوجي للأكسجين', 'unit' => 'mg/L'],
-            'cod' => ['code' => 'COD', 'name' => 'الطلب الكيميائي للأكسجين', 'unit' => 'mg/L'],
-            'tss' => ['code' => 'TSS', 'name' => 'المواد الصلبة العالقة الكلية', 'unit' => 'mg/L'],
-            'oil' => ['code' => 'O&G', 'name' => 'الزيوت والشحوم', 'unit' => 'mg/L'],
-            'nh3' => ['code' => 'NH3', 'name' => 'الأمونيا', 'unit' => 'mg/L'],
-            'ph' => ['code' => 'pH', 'name' => 'الرقم الهيدروجيني', 'unit' => 'pH'],
+        Pollutant::firstOrCreate(
+            ['code' => 'NH3'],
+            ['name' => 'الأمونيا', 'unit' => 'mg/L', 'is_active' => true]
+        );
+
+        $map = [
+            'bod' => 'BOD',
+            'cod' => 'COD',
+            'tss' => 'TSS',
+            'oil' => 'G&O',
+            'nh3' => 'NH3',
+            'ph' => 'PH',
         ];
 
         $pollutants = [];
-        foreach ($data as $key => $attrs) {
-            $p = Pollutant::firstOrCreate(['code' => $attrs['code']], array_merge($attrs, ['is_active' => true]));
-            $pollutants[$key] = $p;
-
-            PollutantLimit::firstOrCreate(
-                ['pollutant_id' => $p->id, 'activity_type' => ActivityType::Industrial->value],
-                [
-                    'min_value' => 0,
-                    'max_value' => match ($key) {
-                        'bod' => 60, 'cod' => 200, 'tss' => 60, 'oil' => 15, 'nh3' => 35, default => 9,
-                    },
-                    'price_per_unit' => match ($key) {
-                        'bod' => 8.5, 'cod' => 5.0, 'tss' => 6.0, 'oil' => 20.0, 'nh3' => 12.0, default => 3.0,
-                    },
-                    'status' => PollutantStatus::Compliant->value,
-                ]
-            );
-
-            PollutantLimit::firstOrCreate(
-                ['pollutant_id' => $p->id, 'activity_type' => ActivityType::Commercial->value],
-                [
-                    'min_value' => 0,
-                    'max_value' => match ($key) {
-                        'bod' => 50, 'cod' => 150, 'tss' => 50, 'oil' => 10, 'nh3' => 25, default => 8.5,
-                    },
-                    'price_per_unit' => match ($key) {
-                        'bod' => 7.0, 'cod' => 4.0, 'tss' => 5.0, 'oil' => 18.0, 'nh3' => 10.0, default => 2.5,
-                    },
-                    'status' => PollutantStatus::Compliant->value,
-                ]
-            );
+        foreach ($map as $key => $code) {
+            $pollutant = Pollutant::query()->where('code', $code)->first();
+            if ($pollutant !== null) {
+                $pollutants[$key] = $pollutant;
+            }
         }
 
         return $pollutants;
     }
 
     /** @return array<string, ViolationRule> */
-    private function seedViolationRules(array $pollutants): array
+    private function loadTariffRules(array $pollutants): array
     {
         $rules = [];
 
-        $ruleData = [
-            'bod' => [
-                ['from' => 60, 'to' => 120, 'duration_days' => 30, 'tiers' => [10, 18, 28]],
-                ['from' => 120, 'to' => null, 'duration_days' => 30, 'tiers' => [20, 35, 55]],
-            ],
-            'cod' => [
-                ['from' => 200, 'to' => 400, 'duration_days' => 30, 'tiers' => [8, 14, 22]],
-                ['from' => 400, 'to' => null, 'duration_days' => 30, 'tiers' => [16, 28, 44]],
-            ],
-            'tss' => [
-                ['from' => 60, 'to' => 150, 'duration_days' => 30, 'tiers' => [9, 16, 25]],
-                ['from' => 150, 'to' => null, 'duration_days' => 30, 'tiers' => [18, 32, 50]],
-            ],
-            'oil' => [
-                ['from' => 15, 'to' => 40, 'duration_days' => 30, 'tiers' => [25, 45, 70]],
-                ['from' => 40, 'to' => null, 'duration_days' => 30, 'tiers' => [50, 90, 140]],
-            ],
-            'nh3' => [
-                ['from' => 35, 'to' => 70, 'duration_days' => 30, 'tiers' => [15, 26, 40]],
-                ['from' => 70, 'to' => null, 'duration_days' => 30, 'tiers' => [30, 52, 80]],
-            ],
-        ];
+        foreach ($pollutants as $key => $pollutant) {
+            $pollutantRules = ViolationRule::query()
+                ->where('pollutant_id', $pollutant->id)
+                ->where('from', '<', 900000)
+                ->orderBy('from')
+                ->get();
 
-        foreach ($ruleData as $key => $rules_config) {
-            if (! isset($pollutants[$key])) {
-                continue;
-            }
-
-            $pollutant = $pollutants[$key];
-            foreach ($rules_config as $i => $config) {
-                $rule = ViolationRule::firstOrCreate(
-                    ['pollutant_id' => $pollutant->id, 'from' => $config['from']],
-                    ['to' => $config['to'], 'duration_days' => $config['duration_days']]
-                );
-
-                foreach ($config['tiers'] as $tierOrder => $pricePerUnit) {
-                    ViolationRuleTier::firstOrCreate(
-                        ['violation_rule_id' => $rule->id, 'tier_order' => $tierOrder + 1],
-                        ['price_per_unit' => $pricePerUnit]
-                    );
-                }
-
-                $rules["{$key}_{$i}"] = $rule;
+            foreach ($pollutantRules as $index => $rule) {
+                $rules["{$key}_{$index}"] = $rule;
             }
         }
 
@@ -161,18 +105,18 @@ class DemoDataSeeder extends Seeder
     private function seedEstablishments(): array
     {
         $establishmentData = [
-            ['name' => 'مصنع النيل للورق والكرتون', 'activity_type' => ActivityType::Industrial, 'location_type' => LocationType::InsideCity],
-            ['name' => 'شركة الدلتا للصناعات الكيماوية', 'activity_type' => ActivityType::Industrial, 'location_type' => LocationType::OutsideCity],
-            ['name' => 'مصنع الإسكندرية للزجاج', 'activity_type' => ActivityType::Industrial, 'location_type' => LocationType::InsideCity],
-            ['name' => 'شركة القاهرة للمنسوجات', 'activity_type' => ActivityType::Industrial, 'location_type' => LocationType::InsideCity],
-            ['name' => 'مصنع الجيزة للبلاستيك', 'activity_type' => ActivityType::Industrial, 'location_type' => LocationType::OutsideCity],
-            ['name' => 'شركة سيناء للصناعات المعدنية', 'activity_type' => ActivityType::Industrial, 'location_type' => LocationType::OutsideCity],
-            ['name' => 'مصنع الصعيد للغزل والنسيج', 'activity_type' => ActivityType::Commercial, 'location_type' => LocationType::InsideCity],
-            ['name' => 'شركة بورسعيد للبتروكيماويات', 'activity_type' => ActivityType::Industrial, 'location_type' => LocationType::OutsideCity],
-            ['name' => 'مصنع الإسماعيلية للطلاء والدهانات', 'activity_type' => ActivityType::Industrial, 'location_type' => LocationType::InsideCity],
-            ['name' => 'شركة المنيا للصناعات الغذائية', 'activity_type' => ActivityType::Commercial, 'location_type' => LocationType::InsideCity],
-            ['name' => 'مصنع أسيوط للأسمدة والكيماويات', 'activity_type' => ActivityType::Industrial, 'location_type' => LocationType::OutsideCity],
-            ['name' => 'شركة طنطا للصناعات الجلدية', 'activity_type' => ActivityType::Commercial, 'location_type' => LocationType::InsideCity],
+            ['name' => 'مصنع النيل للورق والكرتون', 'activity_type' => ActivityType::Industrial, 'location_type' => LocationType::InsideCity, 'customer_zone' => CustomerZone::City],
+            ['name' => 'شركة الدلتا للصناعات الكيماوية', 'activity_type' => ActivityType::Industrial, 'location_type' => LocationType::OutsideCity, 'customer_zone' => CustomerZone::IndustrialZone],
+            ['name' => 'مصنع الإسكندرية للزجاج', 'activity_type' => ActivityType::Industrial, 'location_type' => LocationType::InsideCity, 'customer_zone' => CustomerZone::City],
+            ['name' => 'شركة القاهرة للمنسوجات', 'activity_type' => ActivityType::Industrial, 'location_type' => LocationType::InsideCity, 'customer_zone' => CustomerZone::City],
+            ['name' => 'مصنع الجيزة للبلاستيك', 'activity_type' => ActivityType::Industrial, 'location_type' => LocationType::OutsideCity, 'customer_zone' => CustomerZone::IndustrialZone],
+            ['name' => 'شركة سيناء للصناعات المعدنية', 'activity_type' => ActivityType::Industrial, 'location_type' => LocationType::OutsideCity, 'customer_zone' => CustomerZone::IndustrialZone],
+            ['name' => 'مصنع الصعيد للغزل والنسيج', 'activity_type' => ActivityType::Commercial, 'location_type' => LocationType::InsideCity, 'customer_zone' => CustomerZone::City],
+            ['name' => 'شركة بورسعيد للبتروكيماويات', 'activity_type' => ActivityType::Industrial, 'location_type' => LocationType::OutsideCity, 'customer_zone' => CustomerZone::IndustrialZone],
+            ['name' => 'مصنع الإسماعيلية للطلاء والدهانات', 'activity_type' => ActivityType::Industrial, 'location_type' => LocationType::InsideCity, 'customer_zone' => CustomerZone::City],
+            ['name' => 'شركة المنيا للصناعات الغذائية', 'activity_type' => ActivityType::Commercial, 'location_type' => LocationType::InsideCity, 'customer_zone' => CustomerZone::City],
+            ['name' => 'مصنع أسيوط للأسمدة والكيماويات', 'activity_type' => ActivityType::Industrial, 'location_type' => LocationType::OutsideCity, 'customer_zone' => CustomerZone::IndustrialZone],
+            ['name' => 'شركة طنطا للصناعات الجلدية', 'activity_type' => ActivityType::Commercial, 'location_type' => LocationType::InsideCity, 'customer_zone' => CustomerZone::City],
         ];
 
         $establishments = [];
@@ -182,6 +126,7 @@ class DemoDataSeeder extends Seeder
                 [
                     'activity_type' => $attrs['activity_type'],
                     'location_type' => $attrs['location_type'],
+                    'customer_zone' => $attrs['customer_zone'],
                     'address' => fake()->address(),
                     'contact_person' => fake()->name(),
                     'phone' => '01'.fake()->numerify('#########'),

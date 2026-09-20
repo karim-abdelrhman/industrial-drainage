@@ -39,6 +39,8 @@ class ManageSettings extends Page
 
     public float $vat_percentage = 0;
 
+    public float $cod_discount_when_bod_violation_percent = 40;
+
     public function mount(): void
     {
         $this->collection_fee_inside_city = SystemSetting::get('collection_fee_inside_city', 250);
@@ -48,6 +50,7 @@ class ManageSettings extends Page
         $this->analysis_fee = SystemSetting::get('analysis_fee', 355);
         $this->issuance_fee = SystemSetting::get('issuance_fee', 0.50);
         $this->vat_percentage = SystemSetting::get('vat_percentage', 14);
+        $this->cod_discount_when_bod_violation_percent = SystemSetting::get('cod_discount_when_bod_violation_percent', 40);
     }
 
     public function form(Schema $schema): Schema
@@ -127,6 +130,15 @@ class ManageSettings extends Page
                             ->required()
                             ->suffix('%')
                             ->helperText('تُطبق على إجمالي الفاتورة'),
+                        TextInput::make('cod_discount_when_bod_violation_percent')
+                            ->label('خصم COD عند مخالفة BOD (%)')
+                            ->numeric()
+                            ->minValue(0)
+                            ->maxValue(100)
+                            ->step(0.01)
+                            ->required()
+                            ->suffix('%')
+                            ->helperText('يُطبق على سعر وحدة COD فقط إذا كانت نفس العينة فيها مخالفة BOD'),
                     ]),
             ]);
     }
@@ -152,10 +164,29 @@ class ManageSettings extends Page
             'analysis_fee',
             'issuance_fee',
             'vat_percentage',
+            'cod_discount_when_bod_violation_percent',
+        ];
+
+        $labels = [
+            'collection_fee_inside_city' => 'رسوم جمع العينة داخل النطاق العمراني',
+            'collection_fee_outside_city' => 'رسوم جمع العينة خارج النطاق العمراني',
+            'collection_fee_composite' => 'رسوم جمع العينة المركبة',
+            'admin_fee_percentage' => 'نسبة الرسوم الإدارية',
+            'analysis_fee' => 'رسوم التحليل',
+            'issuance_fee' => 'رسوم الإصدار',
+            'vat_percentage' => 'نسبة ضريبة القيمة المضافة',
+            'cod_discount_when_bod_violation_percent' => 'خصم COD عند مخالفة BOD',
         ];
 
         foreach ($keys as $key) {
-            SystemSetting::where('key', $key)->update(['value' => (string) $this->$key]);
+            SystemSetting::updateOrCreate(
+                ['key' => $key],
+                [
+                    'value' => (string) $this->$key,
+                    'type' => 'decimal',
+                    'label' => $labels[$key] ?? $key,
+                ]
+            );
         }
 
         Notification::make()

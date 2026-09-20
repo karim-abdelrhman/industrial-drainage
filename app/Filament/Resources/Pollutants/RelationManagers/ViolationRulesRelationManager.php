@@ -4,6 +4,8 @@ namespace App\Filament\Resources\Pollutants\RelationManagers;
 
 use App\Filament\Resources\ViolationRules\ViolationRuleResource;
 use App\Models\ViolationRule;
+use App\Support\InclusiveBoundToggles;
+use App\Support\NumericInterval;
 use Closure;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
@@ -39,38 +41,35 @@ class ViolationRulesRelationManager extends RelationManager
                         TextInput::make('from')
                             ->label('الحد الأدنى')
                             ->numeric()
-                            ->minValue(0)
                             ->required(),
                         TextInput::make('to')
                             ->label('الحد الأقصى (فارغ = مفتوح)')
                             ->numeric()
-                            ->minValue(0)
                             ->rules(
                                 fn (Get $get, ?Model $record): array => [
                                     function (string $_attribute, mixed $value, Closure $fail) use ($get, $record, $ownerRecord): void {
                                         $minValue = (float) ($get('from') ?? 0);
 
-                                        if ($value !== null && $value !== '' && (float) $value <= $minValue) {
-                                            $fail('يجب أن يكون الحد الأقصى أكبر من الحد الأدنى.');
+                                        if ($value !== null && $value !== '' && (float) $value < $minValue) {
+                                            $fail('يجب أن يكون الحد الأقصى أكبر من أو يساوي الحد الأدنى.');
 
                                             return;
                                         }
 
-                                        $maxValue = ($value !== null && $value !== '') ? (float) $value : null;
+                                        $candidate = new NumericInterval(
+                                            $minValue,
+                                            (bool) $get('from_inclusive'),
+                                            ($value !== null && $value !== '') ? (float) $value : null,
+                                            (bool) $get('to_inclusive'),
+                                        );
 
-                                        $query = ViolationRule::query()
+                                        $overlaps = ViolationRule::query()
                                             ->where('pollutant_id', $ownerRecord->id)
-                                            ->where('from', '<', $maxValue ?? PHP_INT_MAX)
-                                            ->where(fn ($q) => $q
-                                                ->whereNull('to')
-                                                ->orWhere('to', '>', $minValue)
-                                            );
+                                            ->when($record?->id, fn ($query) => $query->where('id', '!=', $record->id))
+                                            ->get()
+                                            ->contains(fn (ViolationRule $rule) => $rule->interval()->overlaps($candidate));
 
-                                        if ($record?->id) {
-                                            $query->where('id', '!=', $record->id);
-                                        }
-
-                                        if ($query->exists()) {
+                                        if ($overlaps) {
                                             $fail('يوجد تداخل في نطاق القيم مع قاعدة أخرى لنفس الملوث.');
                                         }
                                     },
@@ -82,6 +81,8 @@ class ViolationRulesRelationManager extends RelationManager
                             ->minValue(1)
                             ->required()
                             ->helperText('مدة كل مرحلة قبل الانتقال للتالية'),
+                        InclusiveBoundToggles::lower('from_inclusive')->default(true),
+                        InclusiveBoundToggles::upper('to_inclusive')->default(false),
                     ]),
             ])->columns(1);
     }
@@ -93,12 +94,11 @@ class ViolationRulesRelationManager extends RelationManager
             ->defaultSort('from')
             ->columns([
                 TextColumn::make('from')
-                    ->label('من (مليجرام/لتر)')
-                    ->numeric(),
+                    ->label('من')
+                    ->formatStateUsing(fn ($state, ViolationRule $record): string => InclusiveBoundToggles::formatLower($state, $record->from_inclusive)),
                 TextColumn::make('to')
-                    ->label('إلى (مليجرام/لتر)')
-                    ->numeric()
-                    ->placeholder('مفتوح'),
+                    ->label('إلى')
+                    ->formatStateUsing(fn ($state, ViolationRule $record): string => InclusiveBoundToggles::formatUpper($state, $record->to_inclusive)),
                 TextColumn::make('duration_days')
                     ->label('مهلة الأوضاع (يوم)')
                     ->numeric()

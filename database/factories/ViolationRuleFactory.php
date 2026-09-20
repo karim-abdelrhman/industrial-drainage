@@ -20,6 +20,8 @@ class ViolationRuleFactory extends Factory
             'pollutant_id' => Pollutant::factory(),
             'from' => $from,
             'to' => $to,
+            'from_inclusive' => true,
+            'to_inclusive' => false,
             'duration_days' => $this->faker->randomElement([30, 60, 90]),
         ];
     }

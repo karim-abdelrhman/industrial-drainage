@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Enums\ActivityType;
+use App\Enums\CustomerZone;
 use App\Enums\ViolationStatus;
 use App\Models\PollutantLimit;
 use App\Models\Violation;
@@ -14,49 +14,43 @@ class ViolationService
 {
     /**
      * Find the matching compliant limit for a reading.
-     * Checked before violation rules — boundary values resolve to compliant.
+     * Checked before violation rules — boundary values follow inclusivity flags.
      */
-    public function findLimit(int $pollutantId, float $value, ActivityType $activityType): ?PollutantLimit
+    public function findLimit(int $pollutantId, float $value, CustomerZone $customerZone): ?PollutantLimit
     {
         return PollutantLimit::query()
             ->where('pollutant_id', $pollutantId)
-            ->where('activity_type', $activityType->value)
-            ->where('min_value', '<=', $value)
-            ->where(function ($query) use ($value) {
-                $query->whereNull('max_value')->orWhere('max_value', '>=', $value);
-            })
-            ->first();
+            ->where('customer_zone', $customerZone->value)
+            ->get()
+            ->first(fn (PollutantLimit $limit) => $limit->interval()->contains($value));
     }
 
     /**
-     * Find the matching violation rule for a reading (columns: from / to).
+     * Find the matching violation rule for a reading.
      * Only called when findLimit returns null.
      */
     public function findRule(int $pollutantId, float $value): ?ViolationRule
     {
-        $rule =  ViolationRule::query()
+        return ViolationRule::query()
             ->where('pollutant_id', $pollutantId)
-            ->where('from', '<=', $value)
-            ->where(function ($query) use ($value) {
-                $query->whereNull('to')->orWhere('to', '>', $value);
-            })
+            ->where('from', '<', 900000)
             ->with(['tiers' => fn ($q) => $q->orderBy('tier_order')])
-            ->first();
-        return $rule;
+            ->get()
+            ->first(fn (ViolationRule $rule) => $rule->interval()->contains($value));
     }
 
     /**
      * Compute which tier applies on a given evaluation date using elapsed days.
-     * Tier 3 (or the last defined tier) is the ceiling — it never escalates beyond it.
+     * The last defined tier is the ceiling — it never escalates beyond it.
      *
      * @param  Violation  $violation  Must have violationRule.tiers loaded.
      */
     public function computeTier(Violation $violation, Carbon $evaluationDate): int
     {
-        $elapsedDays = $violation->start_date->diffInDays($evaluationDate);
+        $elapsedDays = (int) $violation->start_date->diffInDays($evaluationDate);
         $durationDays = (int) $violation->violationRule->duration_days;
         $tiers = $violation->violationRule->tiers->sortBy('tier_order')->values();
-        
+
         if ($tiers->isEmpty()) {
             return 1;
         }
@@ -66,10 +60,8 @@ class ViolationService
         }
 
         $tierIndex = min((int) floor($elapsedDays / $durationDays), $tiers->count() - 1);
-        if($tierIndex){
-            return 1;
-        }
-        return $tiers->get($tierIndex )->tier_order;
+
+        return $tiers->get($tierIndex)->tier_order;
     }
 
     /**

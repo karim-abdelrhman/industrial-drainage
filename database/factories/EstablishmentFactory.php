@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\ActivityType;
+use App\Enums\CustomerZone;
 use App\Enums\LocationType;
 use App\Models\Establishment;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -33,9 +34,10 @@ class EstablishmentFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->unique()->randomElement(static::$arabicCompanyNames),
+            'name' => $this->faker->randomElement(static::$arabicCompanyNames).' '.$this->faker->unique()->numerify('####'),
             'activity_type' => $this->faker->randomElement(ActivityType::cases()),
             'location_type' => $this->faker->randomElement(LocationType::cases()),
+            'customer_zone' => $this->faker->randomElement(CustomerZone::cases()),
             'address' => $this->faker->address(),
             'contact_person' => $this->faker->name(),
             'phone' => '01'.$this->faker->numerify('#########'),
@@ -57,5 +59,15 @@ class EstablishmentFactory extends Factory
     public function insideCity(): static
     {
         return $this->state(['location_type' => LocationType::InsideCity]);
+    }
+
+    public function cityZone(): static
+    {
+        return $this->state(['customer_zone' => CustomerZone::City]);
+    }
+
+    public function industrialZone(): static
+    {
+        return $this->state(['customer_zone' => CustomerZone::IndustrialZone]);
     }
 }

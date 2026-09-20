@@ -90,10 +90,15 @@ class EditSample extends EditRecord
             $price = number_format((float) $line['price_per_unit'], 2);
             $amount = number_format((float) $line['amount'], 2);
             $value = number_format((float) $line['detected_value'], 4).' '.$line['unit'];
+            $note = htmlspecialchars($line['notes'] ?? '');
+            $nameCell = htmlspecialchars($line['pollutant_name']);
+            if ($note !== '') {
+                $nameCell .= "<div style='color:#6b7280;font-size:12px;margin-top:2px'>{$note}</div>";
+            }
 
             $rows .= "
                 <tr>
-                    <td style='padding:8px 14px;border-bottom:1px solid #e5e7eb'>{$line['pollutant_name']}</td>
+                    <td style='padding:8px 14px;border-bottom:1px solid #e5e7eb'>{$nameCell}</td>
                     <td style='padding:8px 14px;border-bottom:1px solid #e5e7eb;text-align:center'>{$value}</td>
                     <td style='padding:8px 14px;border-bottom:1px solid #e5e7eb;text-align:center'>
                         <span style='color:{$evalColor};font-weight:600'>{$evalLabel}</span>

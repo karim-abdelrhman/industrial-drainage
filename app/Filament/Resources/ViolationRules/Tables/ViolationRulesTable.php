@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\ViolationRules\Tables;
 
+use App\Models\ViolationRule;
+use App\Support\InclusiveBoundToggles;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -21,11 +23,10 @@ class ViolationRulesTable
                     ->sortable(),
                 TextColumn::make('from')
                     ->label('من')
-                    ->numeric(),
+                    ->formatStateUsing(fn ($state, ViolationRule $record): string => InclusiveBoundToggles::formatLower($state, $record->from_inclusive)),
                 TextColumn::make('to')
                     ->label('إلى')
-                    ->numeric()
-                    ->placeholder('مفتوح'),
+                    ->formatStateUsing(fn ($state, ViolationRule $record): string => InclusiveBoundToggles::formatUpper($state, $record->to_inclusive)),
                 TextColumn::make('tiers_count')
                     ->label('عدد المراحل')
                     ->counts('tiers')

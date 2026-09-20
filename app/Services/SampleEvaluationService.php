@@ -22,6 +22,7 @@ class SampleEvaluationService
     public function __construct(
         private readonly ViolationService $violationService,
         private readonly FeeCalculationService $feeCalculationService,
+        private readonly SampleCalculationService $sampleCalculationService,
     ) {}
 
     /**
@@ -34,7 +35,7 @@ class SampleEvaluationService
             return $sample->invoice ?? Invoice::where('sample_id', $sample->id)->firstOrFail();
         }
 
-        $sample->load(['readings','readings.pollutant', 'establishment']);
+        $sample->load(['readings', 'readings.pollutant', 'establishment']);
 
         return DB::transaction(function () use ($sample) {
             $invoice = Invoice::firstOrCreate(
@@ -50,9 +51,44 @@ class SampleEvaluationService
             $sample->violationSnapshots()->delete();
 
             $pollutantSubtotal = 0.0;
+            $processed = [];
 
             foreach ($sample->readings as $reading) {
                 [$amount, $snapshotData, $itemData] = $this->processReading($sample, $reading);
+                $processed[] = [
+                    'pollutant_code' => $reading->pollutant->code,
+                    'evaluation_result' => $snapshotData['evaluation_result'],
+                    'price_per_unit' => $itemData['price_per_unit'],
+                    'amount' => $amount,
+                    'snapshot' => $snapshotData,
+                    'item' => $itemData,
+                ];
+            }
+
+            $discounted = $this->sampleCalculationService->applyCodDiscountWhenBodViolates(
+                array_map(fn (array $row): array => [
+                    'pollutant_code' => $row['pollutant_code'],
+                    'evaluation_result' => $row['evaluation_result'],
+                    'price_per_unit' => $row['price_per_unit'],
+                    'amount' => $row['amount'],
+                    'notes' => $row['item']['notes'] ?? null,
+                ], $processed)
+            );
+
+            foreach ($processed as $index => $row) {
+                $amount = $discounted[$index]['amount'];
+                $pricePerUnit = $discounted[$index]['price_per_unit'];
+                $notes = $discounted[$index]['notes'] ?? null;
+
+                $snapshotData = $row['snapshot'];
+                $snapshotData['price_per_unit_at_time'] = $pricePerUnit;
+
+                $itemData = $row['item'];
+                $itemData['price_per_unit'] = $pricePerUnit;
+                $itemData['amount'] = $amount;
+                if ($notes !== null) {
+                    $itemData['notes'] = $notes;
+                }
 
                 SampleViolationSnapshot::create($snapshotData);
                 $invoice->items()->create(array_merge($itemData, ['item_type' => InvoiceItemType::PollutantCharge->value]));
@@ -85,9 +121,9 @@ class SampleEvaluationService
     private function processReading(Sample $sample, SampleReading $reading): array
     {
         $value = (float) $reading->detected_value;
-        $activityType = $sample->establishment->activity_type;
+        $customerZone = $sample->establishment->customer_zone;
 
-        $limit = $this->violationService->findLimit($reading->pollutant_id, $value, $activityType);
+        $limit = $this->violationService->findLimit($reading->pollutant_id, $value, $customerZone);
 
         if ($limit !== null) {
             return $this->handleCompliant($sample, $reading, $limit);

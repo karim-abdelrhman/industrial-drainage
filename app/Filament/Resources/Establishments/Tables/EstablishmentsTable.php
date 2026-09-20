@@ -3,10 +3,10 @@
 namespace App\Filament\Resources\Establishments\Tables;
 
 use App\Enums\ActivityType;
+use App\Enums\CustomerZone;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -26,6 +26,9 @@ class EstablishmentsTable
                 TextColumn::make('activity_type')
                     ->label('نوع النشاط')
                     ->badge(),
+                TextColumn::make('customer_zone')
+                    ->label('منطقة العميل')
+                    ->badge(),
                 TextColumn::make('contact_person')
                     ->label('المسؤول')
                     ->searchable(),
@@ -38,6 +41,9 @@ class EstablishmentsTable
                 SelectFilter::make('activity_type')
                     ->label('نوع النشاط')
                     ->options(collect(ActivityType::cases())->mapWithKeys(fn (ActivityType $c) => [$c->value => $c->getLabel()])),
+                SelectFilter::make('customer_zone')
+                    ->label('منطقة العميل')
+                    ->options(collect(CustomerZone::cases())->mapWithKeys(fn (CustomerZone $c) => [$c->value => $c->getLabel()])),
                 TernaryFilter::make('is_active')
                     ->label('نشط'),
             ])

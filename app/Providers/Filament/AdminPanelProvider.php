@@ -40,7 +40,7 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::HEAD_END,
                 fn (): HtmlString => new HtmlString(
-                    '<link rel="stylesheet" href="'.e(asset('css/water-background.css')).'">'
+                    '<link rel="stylesheet" href="'.e(asset('css/admin-theme.css')).'">'
                 ),
             )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')

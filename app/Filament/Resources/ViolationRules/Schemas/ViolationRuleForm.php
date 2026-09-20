@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ViolationRules\Schemas;
 
 use App\Models\Pollutant;
+use App\Support\InclusiveBoundToggles;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
@@ -26,12 +27,13 @@ class ViolationRuleForm
                         TextInput::make('from')
                             ->label('الحد الأدنى')
                             ->numeric()
-                            ->minValue(0)
                             ->required(),
                         TextInput::make('to')
                             ->label('الحد الأقصى (فارغ = مفتوح)')
                             ->numeric()
                             ->minValue(0),
+                        InclusiveBoundToggles::lower('from_inclusive')->default(true),
+                        InclusiveBoundToggles::upper('to_inclusive')->default(false),
                         TextInput::make('duration_days')
                             ->label('مهلة توفيق الأوضاع (أيام)')
                             ->numeric()

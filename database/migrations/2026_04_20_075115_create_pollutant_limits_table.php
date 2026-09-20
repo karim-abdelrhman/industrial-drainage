@@ -18,8 +18,7 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->timestamps();
 
-            $table->index(['pollutant_id', 'activity_type', 'effective_from', 'effective_to'], 'pl_lookup');
-            $table->index('effective_to');
+            $table->index(['pollutant_id', 'activity_type'], 'pl_lookup');
             $table->index('status');
         });
     }
