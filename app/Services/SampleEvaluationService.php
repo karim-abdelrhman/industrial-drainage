@@ -34,7 +34,7 @@ class SampleEvaluationService
             return $sample->invoice ?? Invoice::where('sample_id', $sample->id)->firstOrFail();
         }
 
-        $sample->load(['readings.pollutant', 'establishment']);
+        $sample->load(['readings','readings.pollutant', 'establishment']);
 
         return DB::transaction(function () use ($sample) {
             $invoice = Invoice::firstOrCreate(

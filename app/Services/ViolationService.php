@@ -56,7 +56,7 @@ class ViolationService
         $elapsedDays = $violation->start_date->diffInDays($evaluationDate);
         $durationDays = (int) $violation->violationRule->duration_days;
         $tiers = $violation->violationRule->tiers->sortBy('tier_order')->values();
-
+        
         if ($tiers->isEmpty()) {
             return 1;
         }
@@ -66,8 +66,10 @@ class ViolationService
         }
 
         $tierIndex = min((int) floor($elapsedDays / $durationDays), $tiers->count() - 1);
-
-        return $tiers->get($tierIndex)->tier_order;
+        if($tierIndex){
+            return 1;
+        }
+        return $tiers->get($tierIndex )->tier_order;
     }
 
     /**

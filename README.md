@@ -1,58 +1,214 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# نظام حساب الصرف الصناعي والمطالبات
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+نظام لإدارة عينات الصرف الصناعي والتجاري، تقييم الملوثات وفق قواعد تنظيمية، وحساب مطالبات مالية قابلة للتدقيق لشركة مياه وصرف.
 
-## About Laravel
+الحساب حساس ماليًا: المطالبات قد تصل لمبالغ كبيرة، لذلك يجب أن يكون المحرك حتميًا، قابلًا للمراجعة، ولا يغيّر الفواتير الصادرة عند تعديل الأسعار أو القواعد لاحقًا.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## التقنية
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- PHP 8.3
+- Laravel 13
+- Filament v4
+- Livewire v3
+- MySQL
+- واجهة عربية RTL
+- `barryvdh/laravel-dompdf` (الحزمة موجودة؛ الطباعة الحالية HTML)
+- `maatwebsite/excel` لاستيراد المنشآت
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+لوحة التحكم: `/admin`
 
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## التشغيل السريع
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer setup
+php artisan migrate --seed
+composer run dev
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+أو يدويًا:
 
-## Contributing
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate
+php artisan db:seed
+npm install
+npm run dev
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## الغرض التشغيلي
 
-## Code of Conduct
+المنشآت الصناعية والتجارية تصرف مياه عادمة في الشبكة العامة. المعمل يأخذ عينة ويقيس تركيز الملوثات (مثل BOD وCOD وTSS وpH والزيوت والشحوم) بوحدة mg/L.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+النظام يستخدم هذه القراءات مع الاستهلاك المائي للعينة لحساب مطالبة معالجة الصرف، ثم يضيف الرسوم والضريبة.
 
-## Security Vulnerabilities
+## المفاهيم الأساسية
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+| المفهوم | المعنى |
+|---|---|
+| منشأة | صناعي أو تجاري، داخل أو خارج النطاق العمراني |
+| عينة | تاريخ أخذ العينة + استهلاك م³ + نوع (عادية/مركبة) + قراءات |
+| حد مطابقة | نطاق تركيز مسموح + سعر وحدة حسب نوع النشاط |
+| قاعدة مخالفة | نطاق تركيز مخالف + مهلة أيام واحدة لكل المراحل |
+| مرحلة (Tier) | سعر يتصعّد مع استمرار المخالفة من تاريخ بدايتها |
+| فاتورة | مطالبة مربوطة بعينة واحدة: مسودة → صادرة → مدفوعة / متأخرة |
 
-## License
+الاستهلاك المائي يُسجَّل على **العينة** وليس المنشأة. تاريخ الأعمال هو **تاريخ العينة**، وليس وقت التقييم في النظام.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+نوع النشاط (`industrial` / `commercial`) يؤثّر على حدود المطابقة فقط. قواعد المخالفة عامة لكل ملوث.
+
+## مسار العمل
+
+```text
+منشأة
+  → عينة قيد الانتظار + قراءات ملوثات + استهلاك مائي
+  → معاينة الحساب (بدون حفظ)
+  → تقييم العينة (تصنيف + مخالفة + لقطة + فاتورة مسودة)
+  → إصدار الفاتورة (تاريخ استحقاق افتراضي 30 يومًا)
+  → سداد أو تأخير
+```
+
+التقييم يتم من زر «تقييم العينة» في Filament. المعاينة تستخدم `SampleCalculationService` ولا تكتب في قاعدة البيانات.
+
+## معادلة رسوم الملوث
+
+ثابت الصرف في المحرك: `0.80`
+
+```text
+حجم الصرف الفعّال = الاستهلاك المائي (م³) × 0.80
+المبلغ            = حجم الصرف الفعّال × سعر الوحدة
+```
+
+سعر الوحدة يأتي من حد المطابقة، أو من مرحلة المخالفة المنطبقة.
+
+## تصنيف القراءة
+
+الترتيب مهم ويُطبَّق لكل قراءة على حدة:
+
+1. **مطابقة** إذا وُجد حد امتثال للمنشأة حسب نوع نشاطها:
+   `min_value ≤ القيمة` و `(max_value فارغ أو max_value ≥ القيمة)`
+2. وإلا **مخالفة** إذا وُجدت قاعدة:
+   `from ≤ القيمة` و `(to فارغ أو to > القيمة)`
+3. وإلا **غير مصنّف** — مبلغ صفر وملاحظة على بند الفاتورة.
+
+حد المطابقة يُفحص أولًا. القيمة الواقعة على حد مشترك تُعامل كمطابقة.
+
+الواجهة تمنع تداخل نطاقات المطابقة لنفس الملوث ونوع النشاط، وتداخل قواعد المخالفة لنفس الملوث.
+
+حقول `effective_from` / `effective_to` موجودة على حدود المطابقة لكنها غير مستخدمة في البحث الحالي.
+
+## المخالفات والمراحل
+
+- مخالفة نشطة واحدة لكل زوج (منشأة، ملوث).
+- بداية المخالفة = تاريخ أول عينة مخالفة.
+- عند استمرار المخالفة تُحدَّث القاعدة والقيمة وآخر عينة؛ تاريخ البداية لا يتغير.
+- العودة إلى نطاق المطابقة تغلق المخالفة (`resolved`). عينة مخالفة لاحقة تفتح مخالفة جديدة من المرحلة 1.
+
+حساب المرحلة:
+
+```text
+الأيام المنقضية = الفرق بالأيام بين تاريخ بداية المخالفة وتاريخ العينة
+رقم المرحلة     = min(floor(الأيام ÷ مهلة القاعدة)، آخر مرحلة معرفة)
+```
+
+`duration_days` على القاعدة كلها وليس على كل مرحلة. المرحلة الأخيرة سقف ولا يتجاوزها التصعيد.
+
+مثال مهلة 30 يومًا وثلاث مراحل:
+
+| الأيام منذ بداية المخالفة | المرحلة |
+|---|---|
+| 0–29 | 1 |
+| 30–59 | 2 |
+| 60+ | 3 |
+
+عند تغيّر المرحلة يُسجَّل سطر في `violation_tier_state_logs`. المرساة الزمنية تبقى تاريخ العينة.
+
+## رسوم الفاتورة
+
+بعد مجموع رسوم الملوثات يحسب `FeeCalculationService`:
+
+| البند | القاعدة | القيمة الافتراضية |
+|---|---|---|
+| رسوم الجمع | عينة مركبة مبلغ ثابت؛ وإلا داخل أو خارج النطاق | 1400 / 250 / 450 ج.م |
+| رسوم إدارية | نسبة من رسوم الجمع فقط | 20% |
+| رسوم التحليل | ثابت للعينة | 355 ج.م |
+| رسوم الإصدار | ثابت | 0.50 ج.م |
+| ضريبة القيمة المضافة | نسبة من (الملوثات + الجمع + الإدارية + التحليل + الإصدار) | 14% |
+| تسوية | رفع الإجمالي لأقرب جنيه (`ceil`) | الفرق كبند Rounding |
+
+القيم تُدار من صفحة «إعدادات الرسوم» (`system_settings`).
+
+الإجمالي النهائي = `ceil(المجموع بعد الضريبة)`.
+
+## دورة الفاتورة
+
+```text
+Draft → Issued → Paid
+              ↘ Overdue
+```
+
+- فاتورة واحدة لكل عينة (`establishment_id` + `sample_id`).
+- تقييم العينة لا يتكرر إذا حالتها `evaluated`؛ يعيد الفاتورة الموجودة دون إعادة حساب.
+- المسودة الحالية لا يُعاد توليدها بعد أول تقييم.
+- الإصدار يضبط `issued_at` و`due_date`.
+- `BillingService::flagOverdue()` موجودة لكن لا يوجد جدول زمني يستدعيها تلقائيًا.
+
+طباعة المطالبة: مسار `invoices.print` يعرض HTML للطباعة من المتصفح.
+
+## التدقيق
+
+| الجدول | ماذا يحفظ |
+|---|---|
+| `sample_violation_snapshots` | التركيز، النتيجة (مطابق/مخالفة/غير مصنّف)، القاعدة، المرحلة، السعر وقت التقييم |
+| `violation_tier_state_logs` | انتقالات المرحلة |
+| `invoice_items` | البنود المالية (ملوثات ورسوم وضريبة وتسوية) |
+
+تغيير قاعدة أو سعر لاحقًا يجب ألا يغيّر بنود فاتورة صدرت بالفعل. الآلية الحالية تحمي إعادة التقييم عبر حالة العينة، لكن فورم الفاتورة ما زال يسمح بتعديل يدوي، ولا يوجد إشعار دائن/تسوية بعد الإصدار.
+
+## لوحة المعلومات
+
+- إجمالي المطالبات المالية للشهر الحالي (صادرة ومدفوعة)
+- المخالفات النشطة
+- الفواتير المتأخرة
+- العينات المجمّعة هذا الشهر
+- أكثر المنشآت مخالفة
+- أكثر الملوثات مخالفة
+- تنبيه التصعيد خلال 7 أيام
+- اتجاه الإيرادات لآخر 6 أشهر
+
+## محرك الحساب (الكود)
+
+| الخدمة | الدور |
+|---|---|
+| `SampleCalculationService` | معاينة بدون حفظ |
+| `SampleEvaluationService` | تقييم + مخالفة + لقطة + فاتورة |
+| `ViolationService` | مطابقة الحدود والقواعد وحساب المرحلة |
+| `FeeCalculationService` | الرسوم والضريبة والتقريب |
+| `BillingService` | إصدار / سداد / تعليم التأخير |
+
+قبل أي فيتشر جديدة يجب فهم أثرها على: تقييم العينة، تصنيف الملوث، دورة المخالفة، حساب المرحلة، التسعير، توليد الفاتورة، اللقطات، البيانات التاريخية، والفواتير الصادرة.
+
+## مبادئ التصميم
+
+1. **قواعد كبيانات** — الملوثات والنطاقات والمراحل والرسوم تُضبط من الواجهة، لا تُثبَّت في كود المحرك (عدا معامل الصرف 0.80 حاليًا).
+2. **حتمي** — نفس المدخلات التاريخية يجب أن تنتج نفس الناتج.
+3. **قابل للتدقيق** — كل قرار مالي مهم قابل للتتبع.
+4. **آمن تاريخيًا** — تغيير القواعد المستقبلية لا يفسد الفواتير الصادرة.
+5. **idempotent** — إعادة معالجة العينة لا تنشئ سجلات مالية مكررة.
+6. **قابل للتوسعة** — ملوثات ونطاقات ومراحل ورسوم جديدة بدون إعادة كتابة المحرك.
+
+## غير منفَّذ بعد
+
+- قواعد تسعير عند اجتماع ملوثات معيّنة (مثل BOD + COD) بمعامل ضبط ديناميكي
+- إشعار دائن / تسوية بعد الإصدار بدل تعديل الفاتورة الصادرة
+- منع تقييم تاريخ عينة مستقبلي، ومعالجة العينات التاريخية خارج الترتيب دون إفساد خط المخالفة
+- إعادة توليد فاتورة المسودة بعد التقييم
+- توليد PDF عبر DomPDF
+- اختبارات آلية لمحرك الحساب (الملفات الحالية أمثلة Laravel الافتراضية)
+
+## ملاحظات تطوير حالية
+
+- راجع `ViolationService::computeTier` قبل الاعتماد على التصعيد: شرط `if ($tierIndex) return 1` في الشجرة الحالية يمنع الانتقال لمرحلة أعلى.
+- `SampleCalculationService` ما زال يمرّر `activity_type` إلى `findRule` بعد حذف العمود من قواعد المخالفة؛ معاينة الحساب قد تفشل إلى أن يُوفَّق التوقيع.
+- علاقة `Sample::invoice()` غير معرّفة؛ الاسترجاع الاحتياطي يتم بالاستعلام على `sample_id`.
