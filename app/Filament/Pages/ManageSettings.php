@@ -2,7 +2,9 @@
 
 namespace App\Filament\Pages;
 
+use App\Enums\NavigationGroup;
 use App\Models\SystemSetting;
+use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -15,15 +17,15 @@ class ManageSettings extends Page
 {
     protected string $view = 'filament.pages.manage-settings';
 
-    protected static ?string $navigationLabel = 'الإعدادات';
+    protected static ?string $navigationLabel = 'إعدادات الرسوم';
 
-    protected static ?string $title = 'إعدادات الرسوم';
+    protected static ?string $title = 'إعدادات الرسوم والضرائب';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'الإعدادات';
+    protected static string|\UnitEnum|null $navigationGroup = NavigationGroup::Settings;
 
-    // protected static ?string $navigationIcon = 'o-cog-6-tooth';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCog6Tooth;
 
-    protected static ?int $navigationSort = 99;
+    protected static ?int $navigationSort = 1;
 
     public float $collection_fee_inside_city = 0;
 
@@ -129,7 +131,7 @@ class ManageSettings extends Page
                             ->step(0.01)
                             ->required()
                             ->suffix('%')
-                            ->helperText('تُطبق على إجمالي الفاتورة'),
+                            ->helperText('تُطبق على مجموع الملوثات ورسوم الجمع والإدارية والتحليل والإصدار قبل التسوية'),
                         TextInput::make('cod_discount_when_bod_violation_percent')
                             ->label('خصم COD عند مخالفة BOD (%)')
                             ->numeric()

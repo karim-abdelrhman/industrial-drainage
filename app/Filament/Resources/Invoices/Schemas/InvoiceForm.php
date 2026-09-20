@@ -16,32 +16,41 @@ class InvoiceForm
     {
         return $schema
             ->components([
-                Section::make('بيانات الفاتورة')
+                Section::make('بيانات المنشأة')
+                    ->columns(2)
                     ->schema([
                         Select::make('establishment_id')
                             ->label('المنشأة')
                             ->relationship('establishment', 'name')
                             ->searchable()
                             ->preload()
-                            ->required(),
+                            ->required()
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('تفاصيل المطالبة')
+                    ->columns(3)
+                    ->schema([
                         DatePicker::make('billing_month')
                             ->label('شهر الفوترة')
                             ->displayFormat('Y-m')
                             ->required(),
                         Select::make('status')
                             ->label('الحالة')
-                            ->options(collect(InvoiceStatus::cases())->mapWithKeys(fn (InvoiceStatus $c) => [$c->value => $c->getLabel()]))
+                            ->options(collect(InvoiceStatus::cases())->mapWithKeys(fn (InvoiceStatus $case) => [$case->value => $case->getLabel()]))
                             ->default(InvoiceStatus::Draft->value)
                             ->required(),
                         TextInput::make('total_amount')
-                            ->label('المبلغ الإجمالي')
-                            ->numeric(),
+                            ->label('إجمالي المطالبة (ج.م)')
+                            ->numeric()
+                            ->prefix('ج.م'),
                         DatePicker::make('due_date')
                             ->label('تاريخ الاستحقاق'),
                         Textarea::make('notes')
                             ->label('ملاحظات')
-                    ])->columns(3)
-                    ,
-            ])->columns(1);
+                            ->rows(3)
+                            ->columnSpanFull(),
+                    ]),
+            ]);
     }
 }

@@ -2,7 +2,9 @@
 
 namespace App\Providers\Filament;
 
+use App\Enums\NavigationGroup;
 use App\Filament\Pages\Dashboard;
+use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -30,25 +32,34 @@ class AdminPanelProvider extends PanelProvider
             ->authGuard('admin')
             ->authPasswordBroker('admins')
             ->login()
+            ->brandName('نظام الصرف الصناعي')
             ->brandLogo(asset('images/c14.png'))
-            ->brandLogoHeight('5rem')
-            ->darkMode(condition: true, isForced: true)
+            ->brandLogoHeight('3.25rem')
+            ->font('Cairo', 'https://fonts.bunny.net/css?family=cairo:400,500,600,700&display=swap')
+            ->darkMode()
+            ->defaultThemeMode(ThemeMode::Light)
             ->colors([
-                'primary' => Color::Sky,
-                'gray' => Color::Gray,
+                'primary' => Color::hex('#155E75'),
+                'success' => Color::hex('#15803D'),
+                'warning' => Color::hex('#D97706'),
+                'danger' => Color::hex('#B91C1C'),
+                'info' => Color::hex('#0F766E'),
+                'gray' => Color::Slate,
             ])
+            ->sidebarCollapsibleOnDesktop()
+            ->navigationGroups(NavigationGroup::class)
             ->renderHook(
                 PanelsRenderHook::HEAD_END,
                 fn (): HtmlString => new HtmlString(
                     '<link rel="stylesheet" href="'.e(asset('css/admin-theme.css')).'">'
                 ),
             )
-            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
-            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
+            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
+            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
                 Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
+            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([])
             ->middleware([
                 EncryptCookies::class,

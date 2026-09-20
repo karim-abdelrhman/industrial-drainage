@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Pollutant;
+use App\Models\Violation;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
@@ -10,14 +11,20 @@ use Illuminate\Database\Eloquent\Builder;
 
 class TopPollutantsWidget extends TableWidget
 {
-    protected static ?int $sort = 4;
+    protected static ?int $sort = 5;
 
-    protected int|string|array $columnSpan = 'half';
+    protected int|string|array $columnSpan = [
+        'md' => 1,
+        'xl' => 1,
+    ];
 
     public function table(Table $table): Table
     {
+        $totalViolations = Violation::query()->count();
+
         return $table
-            ->heading('أكثر الملوثات مخالفةً')
+            ->heading('أكثر الملوثات تسبباً في المخالفات')
+            ->description('أعلى خمس ملوثات حسب عدد المخالفات')
             ->query(
                 fn (): Builder => Pollutant::query()
                     ->withCount('violations')
@@ -27,19 +34,25 @@ class TopPollutantsWidget extends TableWidget
             ->columns([
                 TextColumn::make('name')
                     ->label('الملوث')
-                    ->description(fn (Pollutant $record) => $record->code)
-                    ->searchable(),
-
-                TextColumn::make('unit')
-                    ->label('الوحدة')
-                    ->alignCenter(),
-
+                    ->description(fn (Pollutant $record): string => $record->code),
                 TextColumn::make('violations_count')
                     ->label('عدد المخالفات')
-                    ->alignCenter()
+                    ->alignEnd()
                     ->badge()
-                    ->color(fn (int $state) => $state > 5 ? 'danger' : ($state > 2 ? 'warning' : 'gray')),
+                    ->color(fn (int $state): string => $state > 5 ? 'danger' : ($state > 2 ? 'warning' : 'gray')),
+                TextColumn::make('share')
+                    ->label('النسبة')
+                    ->state(function (Pollutant $record) use ($totalViolations): string {
+                        if ($totalViolations === 0) {
+                            return '—';
+                        }
+
+                        return number_format(((int) $record->violations_count / $totalViolations) * 100, 1).'%';
+                    })
+                    ->alignEnd(),
             ])
-            ->paginated(false);
+            ->paginated(false)
+            ->emptyStateHeading('لا توجد مخالفات حسب الملوث')
+            ->emptyStateDescription('ستظهر النسب هنا بعد تسجيل المخالفات.');
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ViolationRules\RelationManagers;
 
+use App\Support\Money;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -59,7 +60,8 @@ class TiersRelationManager extends RelationManager
                     ->sortable(),
                 TextColumn::make('price_per_unit')
                     ->label('السعر / وحدة')
-                    ->money('EGP')
+                    ->formatStateUsing(fn ($state): string => Money::format($state))
+                    ->alignEnd()
                     ->sortable(),
             ])
             ->headerActions([
@@ -68,6 +70,8 @@ class TiersRelationManager extends RelationManager
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),
-            ]);
+            ])
+            ->emptyStateHeading('لا توجد مستويات')
+            ->emptyStateDescription('عرّف سعر كل مستوى تصعيد.');
     }
 }

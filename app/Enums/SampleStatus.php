@@ -13,7 +13,7 @@ enum SampleStatus: string implements HasColor, HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            SampleStatus::Pending => 'قيد الانتظار',
+            SampleStatus::Pending => 'جديدة',
             SampleStatus::Evaluated => 'تم التقييم',
         };
     }

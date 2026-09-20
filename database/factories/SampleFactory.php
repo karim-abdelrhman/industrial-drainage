@@ -19,7 +19,6 @@ class SampleFactory extends Factory
 
         return [
             'establishment_id' => Establishment::factory(),
-            'sample_number' => 'SMP-'.strtoupper($this->faker->unique()->bothify('####??')),
             'sample_date' => $date,
             'water_usage' => $this->faker->randomFloat(2, 10, 500),
             'lab_report_image' => null,

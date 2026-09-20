@@ -13,8 +13,8 @@ enum ViolationStatus: string implements HasColor, HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            ViolationStatus::Active => 'نشط',
-            ViolationStatus::Resolved => 'تم الحل',
+            ViolationStatus::Active => 'نشطة',
+            ViolationStatus::Resolved => 'تمت معالجتها',
         };
     }
 

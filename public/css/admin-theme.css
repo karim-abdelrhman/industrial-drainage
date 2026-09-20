@@ -1,37 +1,325 @@
-.fi-body {
-    background-color: #07141f !important;
-    background-image:
-        radial-gradient(ellipse 90% 70% at 6% -8%, rgba(14, 165, 233, 0.38), transparent 58%),
-        radial-gradient(ellipse 75% 60% at 98% 4%, rgba(6, 182, 212, 0.26), transparent 54%),
-        radial-gradient(ellipse 80% 55% at 72% 108%, rgba(8, 47, 73, 0.95), transparent 58%),
-        linear-gradient(158deg, #07141f 0%, #0c4a6e 48%, #082f49 100%);
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-}
+@import url('https://fonts.bunny.net/css?family=cairo:400,500,600,700&display=swap');
 
 .fi {
-    --gray-800: oklch(0.36 0.016 255);
-    --gray-900: oklch(0.3 0.014 255);
-    --gray-950: oklch(0.21 0.012 255);
+    --font-family: 'Cairo', ui-sans-serif, system-ui, sans-serif;
 }
 
-.fi-layout,
-.fi-main-ctn,
-.fi-simple-layout,
-.fi-simple-main-ctn,
-.fi-page,
-.fi-simple-page {
-    background-color: transparent !important;
-    background-image: none !important;
+.fi-body,
+.fi-simple-layout {
+    font-family: 'Cairo', ui-sans-serif, system-ui, sans-serif;
 }
 
-.fi-section:not(.fi-section-not-contained):not(.fi-aside),
-.fi-section.fi-aside > .fi-section-content-ctn,
-.fi-ta-ctn,
-.fi-wi-stats-overview-stat,
-.fi-simple-main {
-    background-color: color-mix(in oklab, var(--gray-900) 94%, transparent) !important;
-    backdrop-filter: blur(8px);
+.fi-simple-layout {
+    background-color: #f1f5f9;
+    background-image:
+        linear-gradient(180deg, #e8eef3 0%, #f8fafc 42%, #f1f5f9 100%);
+}
+
+.fi-sidebar {
+    border-inline-end: 1px solid rgba(15, 61, 86, 0.08);
+}
+
+.fi-sidebar-header {
+    padding-block: 0.85rem;
+}
+
+.fi-logo {
+    max-height: 3.25rem;
+}
+
+.fi-page-header-heading {
+    letter-spacing: -0.01em;
+}
+
+.fi-wi-stats-overview-stat {
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.fi-ta-header-cell {
+    font-weight: 700;
+    color: #334155;
+}
+
+.fi-ta-cell {
+    vertical-align: middle;
+}
+
+.fi-badge {
+    font-weight: 600;
+}
+
+.money-figure,
+.fi-ta-col.fi-ta-col-money .fi-ta-text {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+    letter-spacing: 0.01em;
+}
+
+.fi-fo-field-wrp-label,
+.fi-in-entry-wrp-label {
+    font-weight: 600;
+}
+
+.alert-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border-radius: 999px;
+    padding: 0.15rem 0.65rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.alert-chip--stable {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.alert-chip--watch {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.alert-chip--urgent {
+    background: #ffedd5;
+    color: #9a3412;
+}
+
+.alert-chip--overdue {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.tier-track {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tier-track__step {
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+    color: #64748b;
+    background: #fff;
+}
+
+.tier-track__step.is-current {
+    border-color: #155e75;
+    background: #ecfeff;
+    color: #164e63;
+    font-weight: 700;
+}
+
+.tier-track__step.is-done {
+    border-color: #99f6e4;
+    background: #f0fdfa;
+    color: #0f766e;
+}
+
+.tier-track__arrow {
+    color: #94a3b8;
+}
+
+.data-sheet-wrap {
+    overflow-x: auto;
+    width: 100%;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.65rem;
+}
+
+.data-sheet {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.data-sheet th {
+    background: #0f3d56;
+    color: #fff;
+    padding: 0.6rem 0.8rem;
+    font-weight: 700;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.data-sheet td {
+    padding: 0.55rem 0.8rem;
+    border-bottom: 1px solid #e2e8f0;
+    vertical-align: middle;
+}
+
+.data-sheet tbody tr:nth-child(even) {
+    background: #f8fafc;
+}
+
+.data-sheet tbody tr.is-violation {
+    background: #fef2f2;
+}
+
+.data-sheet td.is-num,
+.data-sheet tfoot td.is-num {
+    text-align: left;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    font-weight: 600;
+}
+
+.data-sheet__total td {
+    background: #0f3d56;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.data-sheet__empty {
+    margin: 0;
+    padding: 1.25rem 0.25rem;
+    text-align: center;
+    color: #64748b;
+}
+
+.data-sheet__badge {
+    display: inline-flex;
+    border-radius: 999px;
+    padding: 0.12rem 0.55rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.data-sheet__badge--success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.data-sheet__badge--danger {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.data-sheet__badge--gray {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+.invoice-total-callout {
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    border-radius: 0.75rem;
+    padding: 1rem 1.15rem;
+}
+
+.invoice-total-callout strong {
+    display: block;
+    font-size: 1.35rem;
+    color: #0f3d56;
+    font-variant-numeric: tabular-nums;
+}
+
+.ops-alert {
+    display: flex;
+    gap: 0.85rem;
+    align-items: flex-start;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.ops-alert:last-child {
+    border-bottom: 0;
+}
+
+.ops-alert__meta {
+    color: #64748b;
+    font-size: 0.8rem;
+    margin-top: 0.15rem;
+}
+
+.dark {
+    --primary-300: oklch(0.86 0.055 205);
+    --primary-400: oklch(0.80 0.065 205);
+    --primary-500: oklch(0.74 0.07 205);
+    --primary-600: oklch(0.70 0.075 205);
+    --primary-700: oklch(0.62 0.065 205);
+}
+
+.dark .fi-simple-layout {
+    background-color: #111827;
+    background-image:
+        linear-gradient(180deg, #152433 0%, #111827 52%, #0f1722 100%);
+}
+
+.dark .fi-ta-header-cell {
+    color: #cbd5e1;
+}
+
+.dark .fi-wi-stats-overview-stat {
+    border-color: rgba(148, 163, 184, 0.18);
+    box-shadow: none;
+}
+
+.dark .tier-track__step {
+    border-color: rgba(148, 163, 184, 0.22);
+    background: #1e293b;
+    color: #94a3b8;
+}
+
+.dark .tier-track__step.is-current {
+    border-color: #7eb8c9;
+    background: rgba(56, 128, 148, 0.22);
+    color: #b7dce6;
+}
+
+.dark .tier-track__step.is-done {
+    border-color: rgba(45, 212, 191, 0.35);
+    background: rgba(13, 148, 136, 0.18);
+    color: #99f6e4;
+}
+
+.dark .data-sheet-wrap {
+    border-color: rgba(148, 163, 184, 0.2);
+}
+
+.dark .data-sheet th,
+.dark .data-sheet__total td {
+    background: #2a5f73;
+    color: #e8f4f7;
+}
+
+.dark .data-sheet td {
+    border-bottom-color: rgba(148, 163, 184, 0.16);
+}
+
+.dark .data-sheet tbody tr:nth-child(even) {
+    background: rgba(148, 163, 184, 0.06);
+}
+
+.dark .data-sheet tbody tr.is-violation {
+    background: rgba(127, 29, 29, 0.35);
+}
+
+.dark .invoice-total-callout {
+    border-color: rgba(148, 163, 184, 0.22);
+    background: #1e293b;
+}
+
+.dark .invoice-total-callout strong {
+    color: #9ec9d6;
+}
+
+.dark .ops-alert {
+    border-bottom-color: rgba(148, 163, 184, 0.16);
+}
+
+.dark .ops-alert__meta,
+.dark .data-sheet__empty {
+    color: #94a3b8;
+}
+
+@media (max-width: 768px) {
+    .fi-logo {
+        max-height: 2.5rem;
+    }
 }

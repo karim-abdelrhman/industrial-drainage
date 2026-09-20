@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ViolationRules;
 
+use App\Enums\NavigationGroup;
 use App\Filament\Resources\ViolationRules\Pages\CreateViolationRule;
 use App\Filament\Resources\ViolationRules\Pages\EditViolationRule;
 use App\Filament\Resources\ViolationRules\Pages\ListViolationRules;
@@ -14,6 +15,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class ViolationRuleResource extends Resource
 {
@@ -25,7 +27,9 @@ class ViolationRuleResource extends Resource
 
     protected static ?string $pluralModelLabel = 'قواعد المخالفات';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'الصرف الصناعي';
+    protected static string|\UnitEnum|null $navigationGroup = NavigationGroup::Compliance;
+
+    protected static ?int $navigationSort = 2;
 
     public static function form(Schema $schema): Schema
     {
@@ -51,5 +55,10 @@ class ViolationRuleResource extends Resource
             'create' => CreateViolationRule::route('/create'),
             'edit' => EditViolationRule::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->with(['pollutant']);
     }
 }

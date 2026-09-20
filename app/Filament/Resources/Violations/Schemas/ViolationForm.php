@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Violations\Schemas;
 use App\Enums\ViolationStatus;
 use App\Models\Pollutant;
 use App\Models\ViolationRule;
+use App\Support\InclusiveBoundToggles;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -18,15 +19,18 @@ class ViolationForm
         return $schema
             ->components([
                 Section::make('بيانات المخالفة')
+                    ->columns(2)
                     ->schema([
-                        TextInput::make('establishment_id')
-                            ->label('رقم المنشأة')
-                            ->numeric()
+                        Select::make('establishment_id')
+                            ->label('المنشأة')
+                            ->relationship('establishment', 'name')
+                            ->searchable()
+                            ->preload()
                             ->required(),
                         Select::make('pollutant_id')
                             ->label('الملوث')
                             ->relationship('pollutant', 'name')
-                            ->getOptionLabelFromRecordUsing(fn (Pollutant $record) => $record->name ?? $record->code)
+                            ->getOptionLabelFromRecordUsing(fn (Pollutant $record) => ($record->code ? $record->code.' — ' : '').$record->name)
                             ->searchable()
                             ->preload()
                             ->required(),
@@ -34,39 +38,41 @@ class ViolationForm
                             ->label('قاعدة المخالفة')
                             ->relationship('violationRule', 'id')
                             ->getOptionLabelFromRecordUsing(
-                                fn (ViolationRule $record) => "{$record->pollutant?->name} ({$record->min_value} – ".($record->max_value ?? '∞').')'
+                                fn (ViolationRule $record) => ($record->pollutant?->name ?? 'ملوث').' — '
+                                    .InclusiveBoundToggles::formatLower($record->from, (bool) $record->from_inclusive)
+                                    .' / '
+                                    .InclusiveBoundToggles::formatUpper($record->to, (bool) $record->to_inclusive)
                             )
                             ->searchable()
                             ->preload()
                             ->required(),
                         TextInput::make('detected_value')
-                            ->label('القيمة المرصودة')
+                            ->label('التركيز المرصود')
                             ->numeric()
                             ->required(),
-                    ])
-                    ->columns(2),
+                    ]),
 
                 Section::make('بيانات المتابعة')
+                    ->columns(2)
                     ->schema([
                         DatePicker::make('start_date')
                             ->label('تاريخ البدء')
                             ->required(),
                         TextInput::make('current_tier')
-                            ->label('المرحلة الحالية')
+                            ->label('المستوى الحالي')
                             ->numeric()
                             ->minValue(1)
                             ->default(1)
                             ->required(),
                         DatePicker::make('current_tier_start_date')
-                            ->label('تاريخ بدء المرحلة')
+                            ->label('تاريخ بدء المستوى')
                             ->required(),
                         Select::make('status')
                             ->label('الحالة')
-                            ->options(collect(ViolationStatus::cases())->mapWithKeys(fn (ViolationStatus $c) => [$c->value => $c->getLabel()]))
+                            ->options(collect(ViolationStatus::cases())->mapWithKeys(fn (ViolationStatus $case) => [$case->value => $case->getLabel()]))
                             ->default(ViolationStatus::Active->value)
                             ->required(),
-                    ])
-                    ->columns(2),
+                    ]),
             ]);
     }
 }

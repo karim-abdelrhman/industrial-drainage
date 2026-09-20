@@ -12,15 +12,15 @@ use Illuminate\Support\Facades\DB;
 
 class EscalationAlertsWidget extends TableWidget
 {
-    protected static ?int $sort = 5;
+    protected static ?int $sort = 6;
 
     protected int|string|array $columnSpan = 'full';
 
     public function table(Table $table): Table
     {
         return $table
-            ->heading('تنبيهات التصعيد القريب (خلال 7 أيام)')
-            ->description('المخالفات التي ستنتقل إلى المستوى التالي خلال أسبوع')
+            ->heading('تصعيد المخالفات خلال 7 أيام')
+            ->description('المخالفات النشطة التي ستنتقل إلى المستوى التالي خلال أسبوع')
             ->query(fn (): Builder => $this->escalationQuery())
             ->columns([
                 TextColumn::make('establishment.name')
@@ -58,7 +58,7 @@ class EscalationAlertsWidget extends TableWidget
             ->defaultSort('days_until_next', 'asc')
             ->paginated(false)
             ->emptyStateHeading('لا توجد مخالفات قريبة من التصعيد')
-            ->emptyStateDescription('لا توجد مخالفات نشطة ستتصاعد خلال الأيام السبعة القادمة');
+            ->emptyStateDescription('لا توجد مخالفات نشطة ستتصاعد خلال الأيام السبعة القادمة.');
     }
 
     private function escalationQuery(): Builder

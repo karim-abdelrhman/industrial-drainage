@@ -45,6 +45,9 @@ class ViolationRulesTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->emptyStateHeading('لا توجد قواعد مخالفة')
+            ->emptyStateDescription('أضف نطاقات المخالفة ومستوياتها لكل ملوث.')
+            ->striped();
     }
 }

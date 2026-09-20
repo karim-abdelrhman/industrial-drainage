@@ -65,6 +65,9 @@ class ReadingsRelationManager extends RelationManager
             ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),
-            ]);
+            ])
+            ->emptyStateHeading('لا توجد قراءات')
+            ->emptyStateDescription('أضف نتائج التحاليل لكل ملوث في العينة.')
+            ->striped();
     }
 }

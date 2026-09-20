@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Samples\Schemas;
 use App\Enums\SampleStatus;
 use App\Enums\SampleType;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -18,6 +19,7 @@ class SampleForm
         return $schema
             ->components([
                 Section::make('بيانات العينة')
+                    ->columns(2)
                     ->schema([
                         Select::make('establishment_id')
                             ->label('المنشأة')
@@ -27,9 +29,10 @@ class SampleForm
                             ->required(),
                         TextInput::make('sample_number')
                             ->label('رقم العينة')
-                            ->required()
-                            ->maxLength(50)
-                            ->unique(ignoreRecord: true),
+                            ->disabled()
+                            ->dehydrated(fn (string $operation): bool => $operation !== 'create')
+                            ->placeholder('يُولَّد تلقائيًا')
+                            ->helperText('رقم تسلسلي يُنشأ تلقائيًا عند الحفظ'),
                         DatePicker::make('sample_date')
                             ->label('تاريخ أخذ العينة')
                             ->required(),
@@ -38,26 +41,37 @@ class SampleForm
                             ->numeric()
                             ->minValue(0)
                             ->step(0.0001)
-                            ->required(),
+                            ->required()
+                            ->helperText('يُضرب تلقائيًا في معامل الصرف 80% داخل محرك الحساب'),
                         Select::make('sample_type')
                             ->label('نوع العينة')
-                            ->options(collect(SampleType::cases())->mapWithKeys(fn (SampleType $c) => [$c->value => $c->getLabel()]))
+                            ->options(collect(SampleType::cases())->mapWithKeys(fn (SampleType $case) => [$case->value => $case->getLabel()]))
                             ->default(SampleType::Regular->value)
                             ->required()
-                            ->helperText('المركبة: 1400 ج.م — العادية: تبعًا لموقع المنشأة'),
+                            ->helperText('المركبة: رسم جمع ثابت — العادية: تبعًا لموقع المنشأة'),
                         TextInput::make('collected_by')
                             ->label('جُمعت بواسطة')
                             ->maxLength(150),
                         Select::make('status')
                             ->label('الحالة')
-                            ->options(collect(SampleStatus::cases())->mapWithKeys(fn (SampleStatus $c) => [$c->value => $c->getLabel()]))
+                            ->options(collect(SampleStatus::cases())->mapWithKeys(fn (SampleStatus $case) => [$case->value => $case->getLabel()]))
                             ->default(SampleStatus::Pending->value)
                             ->required(),
                         Textarea::make('notes')
                             ->label('ملاحظات')
+                            ->rows(3)
                             ->columnSpanFull(),
-                    ])
-                    ->columns(2),
+                    ]),
+
+                Section::make('المرفقات')
+                    ->schema([
+                        FileUpload::make('lab_report_image')
+                            ->label('تقرير المعمل')
+                            ->image()
+                            ->directory('lab-reports')
+                            ->nullable()
+                            ->helperText('صورة أو ملف تقرير التحليل الصادر عن المعمل'),
+                    ]),
             ]);
     }
 }

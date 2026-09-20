@@ -40,6 +40,9 @@ class PollutantsTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->emptyStateHeading('لا توجد ملوثات')
+            ->emptyStateDescription('عرّف الملوثات وحدودها قبل تسجيل العينات.')
+            ->striped();
     }
 }

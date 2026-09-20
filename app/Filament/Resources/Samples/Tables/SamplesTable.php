@@ -3,7 +3,9 @@
 namespace App\Filament\Resources\Samples\Tables;
 
 use App\Enums\SampleStatus;
+use App\Enums\SampleType;
 use App\Filament\Resources\Invoices\InvoiceResource;
+use App\Filament\Resources\Samples\SampleResource;
 use App\Models\Invoice;
 use App\Models\Sample;
 use App\Services\SampleEvaluationService;
@@ -11,11 +13,15 @@ use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DatePicker;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class SamplesTable
 {
@@ -26,19 +32,26 @@ class SamplesTable
                 TextColumn::make('sample_number')
                     ->label('رقم العينة')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('medium'),
                 TextColumn::make('establishment.name')
                     ->label('المنشأة')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->wrap(),
                 TextColumn::make('sample_date')
                     ->label('تاريخ العينة')
                     ->date('Y-m-d')
                     ->sortable(),
                 TextColumn::make('water_usage')
-                    ->label('الاستخدام المائي (م³)')
+                    ->label('الاستهلاك (م³)')
                     ->numeric(4)
+                    ->alignEnd()
                     ->sortable(),
+                TextColumn::make('sample_type')
+                    ->label('النوع')
+                    ->badge()
+                    ->toggleable(),
                 TextColumn::make('collected_by')
                     ->label('جُمعت بواسطة')
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -46,26 +59,45 @@ class SamplesTable
                     ->label('القراءات')
                     ->counts('readings')
                     ->badge()
-                    ->color('info'),
+                    ->color('gray'),
                 TextColumn::make('status')
                     ->label('الحالة')
                     ->badge(),
             ])
             ->defaultSort('sample_date', 'desc')
+            ->striped()
             ->filters([
                 SelectFilter::make('establishment_id')
                     ->label('المنشأة')
-                    ->relationship('establishment', 'name'),
+                    ->relationship('establishment', 'name')
+                    ->searchable()
+                    ->preload(),
                 SelectFilter::make('status')
                     ->label('الحالة')
-                    ->options(collect(SampleStatus::cases())->mapWithKeys(fn (SampleStatus $c) => [$c->value => $c->getLabel()])),
+                    ->options(collect(SampleStatus::cases())->mapWithKeys(fn (SampleStatus $case) => [$case->value => $case->getLabel()])),
+                SelectFilter::make('sample_type')
+                    ->label('نوع العينة')
+                    ->options(collect(SampleType::cases())->mapWithKeys(fn (SampleType $case) => [$case->value => $case->getLabel()])),
+                Filter::make('sample_date')
+                    ->label('التاريخ')
+                    ->form([
+                        DatePicker::make('from')->label('من'),
+                        DatePicker::make('until')->label('إلى'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['from'] ?? null, fn (Builder $q, $date) => $q->whereDate('sample_date', '>=', $date))
+                            ->when($data['until'] ?? null, fn (Builder $q, $date) => $q->whereDate('sample_date', '<=', $date));
+                    }),
             ])
+            ->recordUrl(fn (Sample $record): string => SampleResource::getUrl('view', ['record' => $record]))
             ->recordActions([
+                ViewAction::make(),
                 Action::make('evaluate')
                     ->label('تقييم')
                     ->icon(Heroicon::OutlinedPlay)
                     ->color('success')
-                    ->visible(fn (Sample $record) => $record->status === SampleStatus::Pending)
+                    ->visible(fn (Sample $record): bool => $record->status === SampleStatus::Pending)
                     ->requiresConfirmation()
                     ->modalHeading('تقييم العينة')
                     ->modalDescription('سيتم تقييم جميع قراءات العينة وإنشاء الفاتورة تلقائيًا. لا يمكن التراجع عن هذا الإجراء.')
@@ -79,31 +111,31 @@ class SamplesTable
                             ->success()
                             ->actions([
                                 \Filament\Notifications\Actions\Action::make('view_invoice')
-                                    ->label('عرض الفاتورة')
-                                    ->url(InvoiceResource::getUrl('edit', ['record' => $invoice->id])),
+                                    ->label('عرض المطالبة')
+                                    ->url(InvoiceResource::getUrl('view', ['record' => $invoice->id])),
                             ])
                             ->send();
                     }),
-
                 Action::make('view_invoice')
-                    ->label('الفاتورة')
+                    ->label('المطالبة')
                     ->icon(Heroicon::OutlinedDocumentText)
-                    ->color('info')
-                    ->visible(fn (Sample $record) => $record->status === SampleStatus::Evaluated)
+                    ->color('gray')
+                    ->visible(fn (Sample $record): bool => $record->status === SampleStatus::Evaluated)
                     ->url(function (Sample $record): string {
-                        $invoice = Invoice::where('sample_id', $record->id)->first();
+                        $invoice = Invoice::query()->where('sample_id', $record->id)->first();
 
                         return $invoice
-                            ? InvoiceResource::getUrl('edit', ['record' => $invoice->id])
-                            : '#';
+                            ? InvoiceResource::getUrl('view', ['record' => $invoice->id])
+                            : SampleResource::getUrl('view', ['record' => $record]);
                     }),
-
                 EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->emptyStateHeading('لا توجد عينات حتى الآن')
+            ->emptyStateDescription('سجّل عينة معملية لبدء الرصد والتقييم.');
     }
 }

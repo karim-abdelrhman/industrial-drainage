@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\SampleStatus;
 use App\Enums\SampleType;
+use App\Support\SampleNumber;
 use Database\Factories\SampleFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -52,5 +53,16 @@ class Sample extends Model
     public function scopeEvaluated(Builder $query): void
     {
         $query->where('status', SampleStatus::Evaluated);
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (Sample $sample): void {
+            if (filled($sample->sample_number)) {
+                return;
+            }
+
+            $sample->sample_number = SampleNumber::next();
+        });
     }
 }

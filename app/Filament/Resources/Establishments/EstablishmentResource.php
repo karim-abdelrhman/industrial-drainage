@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Establishments;
 
+use App\Enums\NavigationGroup;
 use App\Filament\Resources\Establishments\Pages\CreateEstablishment;
 use App\Filament\Resources\Establishments\Pages\EditEstablishment;
 use App\Filament\Resources\Establishments\Pages\ListEstablishments;
@@ -21,11 +22,15 @@ class EstablishmentResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice2;
 
+    protected static ?string $recordTitleAttribute = 'name';
+
     protected static ?string $modelLabel = 'منشأة';
 
     protected static ?string $pluralModelLabel = 'المنشآت';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'الصرف الصناعي';
+    protected static string|\UnitEnum|null $navigationGroup = NavigationGroup::Facilities;
+
+    protected static ?int $navigationSort = 1;
 
     public static function form(Schema $schema): Schema
     {

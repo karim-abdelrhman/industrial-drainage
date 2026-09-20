@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Pollutants;
 
+use App\Enums\NavigationGroup;
 use App\Filament\Resources\Pollutants\Pages\CreatePollutant;
 use App\Filament\Resources\Pollutants\Pages\EditPollutant;
 use App\Filament\Resources\Pollutants\Pages\ListPollutants;
@@ -20,13 +21,17 @@ class PollutantResource extends Resource
 {
     protected static ?string $model = Pollutant::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBeaker;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
+
+    protected static ?string $recordTitleAttribute = 'name';
 
     protected static ?string $modelLabel = 'ملوث';
 
     protected static ?string $pluralModelLabel = 'الملوثات';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'الصرف الصناعي';
+    protected static string|\UnitEnum|null $navigationGroup = NavigationGroup::Laboratory;
+
+    protected static ?int $navigationSort = 2;
 
     public static function form(Schema $schema): Schema
     {

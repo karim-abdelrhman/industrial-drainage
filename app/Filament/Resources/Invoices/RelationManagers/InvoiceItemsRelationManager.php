@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Invoices\RelationManagers;
 
 use App\Enums\InvoiceItemType;
+use App\Support\Money;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
@@ -12,7 +13,7 @@ class InvoiceItemsRelationManager extends RelationManager
 {
     protected static string $relationship = 'items';
 
-    protected static ?string $title = 'بنود الفاتورة';
+    protected static ?string $title = 'بنود المطالبة';
 
     public function isReadOnly(): bool
     {
@@ -33,11 +34,11 @@ class InvoiceItemsRelationManager extends RelationManager
                     ->formatStateUsing(fn ($state) => $state instanceof InvoiceItemType ? $state->getLabel() : InvoiceItemType::from($state)->getLabel())
                     ->badge()
                     ->color(fn ($state): string => match (is_string($state) ? $state : $state->value) {
-                        InvoiceItemType::PollutantCharge->value => 'info',
+                        InvoiceItemType::PollutantCharge->value => 'primary',
                         InvoiceItemType::CollectionFee->value, InvoiceItemType::AdminFee->value => 'gray',
-                        InvoiceItemType::AnalysisFee->value, InvoiceItemType::IssuanceFee->value => 'warning',
-                        InvoiceItemType::Vat->value => 'danger',
-                        InvoiceItemType::Rounding->value => 'success',
+                        InvoiceItemType::AnalysisFee->value, InvoiceItemType::IssuanceFee->value => 'info',
+                        InvoiceItemType::Vat->value => 'warning',
+                        InvoiceItemType::Rounding->value => 'gray',
                         default => 'gray',
                     }),
                 TextColumn::make('pollutant.name')
@@ -48,14 +49,14 @@ class InvoiceItemsRelationManager extends RelationManager
                     ->label('الوحدة')
                     ->placeholder('—'),
                 TextColumn::make('detected_value')
-                    ->label('القيمة المرصودة')
+                    ->label('التركيز')
                     ->formatStateUsing(fn ($state, $record) => $record->item_type === InvoiceItemType::PollutantCharge ? number_format((float) $state, 4) : '—')
                     ->placeholder('—'),
                 TextColumn::make('tier_order')
-                    ->label('المرحلة')
+                    ->label('المستوى')
                     ->formatStateUsing(fn ($state, $record) => match (true) {
                         $record->item_type !== InvoiceItemType::PollutantCharge => '—',
-                        $state !== null => 'المرحلة '.$state,
+                        $state !== null => 'المستوى '.$state,
                         default => 'مطابق',
                     })
                     ->badge()
@@ -66,11 +67,13 @@ class InvoiceItemsRelationManager extends RelationManager
                     }),
                 TextColumn::make('price_per_unit')
                     ->label('سعر الوحدة')
-                    ->formatStateUsing(fn ($state, $record) => $record->item_type === InvoiceItemType::PollutantCharge ? number_format((float) $state, 2).' ج.م' : '—')
+                    ->formatStateUsing(fn ($state, $record) => $record->item_type === InvoiceItemType::PollutantCharge ? Money::format($state) : '—')
+                    ->alignEnd()
                     ->placeholder('—'),
                 TextColumn::make('amount')
-                    ->label('المبلغ (ج.م)')
-                    ->money('EGP')
+                    ->label('المبلغ')
+                    ->formatStateUsing(fn ($state): string => Money::format($state))
+                    ->alignEnd()
                     ->weight('bold'),
                 TextColumn::make('notes')
                     ->label('ملاحظات')
@@ -79,6 +82,8 @@ class InvoiceItemsRelationManager extends RelationManager
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->striped()
-            ->paginated(false);
+            ->paginated(false)
+            ->emptyStateHeading('لا توجد بنود في هذه المطالبة')
+            ->emptyStateDescription('تظهر بنود الرسوم والملوثات هنا بعد التقييم.');
     }
 }

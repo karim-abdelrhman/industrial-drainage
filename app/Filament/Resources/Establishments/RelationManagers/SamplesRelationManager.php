@@ -44,7 +44,10 @@ class SamplesRelationManager extends RelationManager
                 ->schema([
                     TextInput::make('sample_number')
                         ->label('رقم العينة')
-                        ->required(),
+                        ->disabled()
+                        ->dehydrated(fn (string $operation): bool => $operation !== 'create')
+                        ->placeholder('يُولَّد تلقائيًا')
+                        ->helperText('رقم تسلسلي يُنشأ تلقائيًا عند الحفظ'),
                     DatePicker::make('sample_date')
                         ->label('تاريخ أخذ العينة')
                         ->required(),
@@ -165,7 +168,7 @@ class SamplesRelationManager extends RelationManager
                             ->success()
                             ->send();
 
-                        $this->redirect(InvoiceResource::getUrl('edit', ['record' => $invoice->id]));
+                        $this->redirect(InvoiceResource::getUrl('view', ['record' => $invoice->id]));
                     }),
 
                 Action::make('view_invoice')
@@ -177,7 +180,7 @@ class SamplesRelationManager extends RelationManager
                         $invoice = Invoice::where('sample_id', $record->id)->first();
 
                         return $invoice
-                            ? InvoiceResource::getUrl('edit', ['record' => $invoice->id])
+                            ? InvoiceResource::getUrl('view', ['record' => $invoice->id])
                             : '#';
                     }),
 

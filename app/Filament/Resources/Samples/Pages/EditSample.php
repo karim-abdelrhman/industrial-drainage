@@ -59,7 +59,7 @@ class EditSample extends EditRecord
                         ->success()
                         ->send();
 
-                    $this->redirect(InvoiceResource::getUrl('edit', ['record' => $invoice->id]));
+                    $this->redirect(InvoiceResource::getUrl('view', ['record' => $invoice->id]));
                 }),
 
             DeleteAction::make()
@@ -139,7 +139,7 @@ class EditSample extends EditRecord
                 <h3 style='margin:0 0 8px;font-size:15px;font-weight:700;color:#1f2937;padding:0 4px'>رسوم الملوثات</h3>
                 <table style='width:100%;border-collapse:collapse;font-size:14px;margin-bottom:20px'>
                     <thead>
-                        <tr style='background:#4b5563;color:#fff'>
+                        <tr style='background:#155E75;color:#fff'>
                             <th style='padding:9px 14px;text-align:right;font-weight:700'>الملوث</th>
                             <th style='padding:9px 14px;text-align:center;font-weight:700'>القيمة المرصودة</th>
                             <th style='padding:9px 14px;text-align:center;font-weight:700'>التصنيف</th>
@@ -154,7 +154,7 @@ class EditSample extends EditRecord
                 <h3 style='margin:0 0 8px;font-size:15px;font-weight:700;color:#1f2937;padding:0 4px'>الرسوم الإضافية</h3>
                 <table style='width:100%;border-collapse:collapse;font-size:14px;margin-bottom:20px'>
                     <thead>
-                        <tr style='background:#4b5563;color:#fff'>
+                        <tr style='background:#155E75;color:#fff'>
                             <th style='padding:9px 14px;text-align:right;font-weight:700'>البند</th>
                             <th style='padding:9px 14px;text-align:right;font-weight:700'>تفاصيل</th>
                             <th style='padding:9px 14px;text-align:center;font-weight:700'>المبلغ</th>
@@ -164,7 +164,7 @@ class EditSample extends EditRecord
                 </table>
 
                 <table style='width:100%;border-collapse:collapse;font-size:15px'>
-                    <tr style='background:#1d4ed8;color:#fff'>
+                    <tr style='background:#0F3D56;color:#fff'>
                         <td style='padding:14px;font-weight:700;text-align:right;font-size:16px'>الإجمالي النهائي</td>
                         <td style='padding:14px;font-weight:700;text-align:center;font-size:18px'>{$grandTotal} ج.م</td>
                     </tr>

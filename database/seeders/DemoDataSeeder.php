@@ -141,17 +141,14 @@ class DemoDataSeeder extends Seeder
 
     private function seedSamplesAndReadings(array $establishments, array $pollutants): void
     {
-        $sampleCounter = Sample::max('id') ?? 0;
         $pollutantList = array_filter($pollutants, fn ($key) => $key !== 'ph', ARRAY_FILTER_USE_KEY);
 
         foreach ($establishments as $establishment) {
             for ($monthOffset = 5; $monthOffset >= 0; $monthOffset--) {
                 $sampleDate = now()->subMonths($monthOffset)->startOfMonth()->addDays(fake()->numberBetween(2, 20));
-                $sampleCounter++;
 
                 $sample = Sample::create([
                     'establishment_id' => $establishment->id,
-                    'sample_number' => 'SMP-'.str_pad($sampleCounter, 5, '0', STR_PAD_LEFT),
                     'sample_date' => $sampleDate,
                     'water_usage' => fake()->randomFloat(2, 20, 300),
                     'collected_by' => 'م. أحمد '.fake()->lastName(),
