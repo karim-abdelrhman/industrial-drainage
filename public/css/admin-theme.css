@@ -238,62 +238,104 @@
 }
 
 .dark {
-    --primary-300: oklch(0.86 0.055 205);
-    --primary-400: oklch(0.80 0.065 205);
-    --primary-500: oklch(0.74 0.07 205);
-    --primary-600: oklch(0.70 0.075 205);
-    --primary-700: oklch(0.62 0.065 205);
+    --primary-50: oklch(0.96 0.02 300);
+    --primary-100: oklch(0.91 0.05 300);
+    --primary-200: oklch(0.84 0.09 302);
+    --primary-300: oklch(0.78 0.13 304);
+    --primary-400: oklch(0.71 0.16 306);
+    --primary-500: oklch(0.64 0.18 308);
+    --primary-600: oklch(0.56 0.19 310);
+    --primary-700: oklch(0.48 0.16 308);
+    --primary-800: oklch(0.39 0.13 300);
+    --primary-900: oklch(0.31 0.10 292);
+    --primary-950: oklch(0.22 0.08 286);
+    --gray-50: oklch(0.97 0.012 300);
+    --gray-100: oklch(0.93 0.018 298);
+    --gray-200: oklch(0.86 0.022 296);
+    --gray-300: oklch(0.76 0.028 294);
+    --gray-400: oklch(0.66 0.032 292);
+    --gray-500: oklch(0.56 0.034 290);
+    --gray-600: oklch(0.46 0.036 288);
+    --gray-700: oklch(0.37 0.038 286);
+    --gray-800: oklch(0.29 0.036 284);
+    --gray-900: oklch(0.22 0.032 282);
+    --gray-950: oklch(0.16 0.028 280);
 }
 
+.dark .fi-body,
 .dark .fi-simple-layout {
-    background-color: #111827;
+    background-color: #12081c;
     background-image:
-        linear-gradient(180deg, #152433 0%, #111827 52%, #0f1722 100%);
+        radial-gradient(ellipse 90% 55% at 8% -10%, rgba(168, 85, 247, 0.38), transparent 58%),
+        radial-gradient(ellipse 70% 50% at 100% 0%, rgba(99, 102, 241, 0.28), transparent 52%),
+        radial-gradient(ellipse 65% 55% at 92% 100%, rgba(192, 38, 211, 0.22), transparent 58%),
+        radial-gradient(ellipse 50% 40% at 20% 85%, rgba(76, 29, 149, 0.35), transparent 60%),
+        linear-gradient(165deg, #1c0d2e 0%, #140820 38%, #0e0618 68%, #170a28 100%);
+    background-attachment: fixed;
+}
+
+.dark .fi-sidebar {
+    background:
+        linear-gradient(180deg, rgba(42, 16, 72, 0.92) 0%, rgba(18, 8, 32, 0.96) 48%, rgba(12, 6, 24, 0.98) 100%);
+    border-inline-end-color: rgba(196, 181, 253, 0.14);
+    backdrop-filter: blur(10px);
+}
+
+.dark .fi-topbar,
+.dark .fi-header {
+    background: linear-gradient(90deg, rgba(36, 14, 58, 0.72), rgba(18, 8, 32, 0.55) 55%, rgba(76, 29, 149, 0.28));
+    border-color: rgba(196, 181, 253, 0.12);
+}
+
+.dark .fi-sidebar-item-active .fi-sidebar-item-btn,
+.dark .fi-sidebar-item-active > .fi-sidebar-item-btn {
+    background: linear-gradient(90deg, rgba(139, 92, 246, 0.32), rgba(168, 85, 247, 0.12));
 }
 
 .dark .fi-ta-header-cell {
-    color: #cbd5e1;
+    color: #ddd6fe;
 }
 
 .dark .fi-wi-stats-overview-stat {
-    border-color: rgba(148, 163, 184, 0.18);
-    box-shadow: none;
+    border-color: rgba(196, 181, 253, 0.2);
+    background: linear-gradient(160deg, rgba(46, 16, 74, 0.55), rgba(24, 10, 40, 0.7));
+    box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.08), 0 12px 28px rgba(76, 29, 149, 0.18);
 }
 
 .dark .tier-track__step {
-    border-color: rgba(148, 163, 184, 0.22);
-    background: #1e293b;
-    color: #94a3b8;
+    border-color: rgba(196, 181, 253, 0.22);
+    background: #241436;
+    color: #c4b5fd;
 }
 
 .dark .tier-track__step.is-current {
-    border-color: #7eb8c9;
-    background: rgba(56, 128, 148, 0.22);
-    color: #b7dce6;
+    border-color: #c4b5fd;
+    background: rgba(139, 92, 246, 0.28);
+    color: #ede9fe;
 }
 
 .dark .tier-track__step.is-done {
-    border-color: rgba(45, 212, 191, 0.35);
-    background: rgba(13, 148, 136, 0.18);
-    color: #99f6e4;
+    border-color: rgba(167, 139, 250, 0.4);
+    background: rgba(109, 40, 217, 0.22);
+    color: #ddd6fe;
 }
 
 .dark .data-sheet-wrap {
-    border-color: rgba(148, 163, 184, 0.2);
+    border-color: rgba(196, 181, 253, 0.22);
 }
 
 .dark .data-sheet th,
 .dark .data-sheet__total td {
-    background: #2a5f73;
-    color: #e8f4f7;
+    background: linear-gradient(90deg, #4c1d95, #6d28d9 55%, #7c3aed);
+    color: #f5f3ff;
 }
 
 .dark .data-sheet td {
-    border-bottom-color: rgba(148, 163, 184, 0.16);
+    border-bottom-color: rgba(196, 181, 253, 0.14);
 }
 
 .dark .data-sheet tbody tr:nth-child(even) {
-    background: rgba(148, 163, 184, 0.06);
+    background: rgba(139, 92, 246, 0.08);
 }
 
 .dark .data-sheet tbody tr.is-violation {
@@ -301,21 +343,21 @@
 }
 
 .dark .invoice-total-callout {
-    border-color: rgba(148, 163, 184, 0.22);
-    background: #1e293b;
+    border-color: rgba(196, 181, 253, 0.24);
+    background: linear-gradient(145deg, #2a1544, #1a0c2c);
 }
 
 .dark .invoice-total-callout strong {
-    color: #9ec9d6;
+    color: #ddd6fe;
 }
 
 .dark .ops-alert {
-    border-bottom-color: rgba(148, 163, 184, 0.16);
+    border-bottom-color: rgba(196, 181, 253, 0.14);
 }
 
 .dark .ops-alert__meta,
 .dark .data-sheet__empty {
-    color: #94a3b8;
+    color: #c4b5fd;
 }
 
 @media (max-width: 768px) {
