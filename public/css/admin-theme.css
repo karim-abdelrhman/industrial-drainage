@@ -15,8 +15,68 @@
         linear-gradient(180deg, #e8eef3 0%, #f8fafc 42%, #f1f5f9 100%);
 }
 
-.fi-sidebar {
-    border-inline-end: 1px solid rgba(15, 61, 86, 0.08);
+html:not(.dark) .fi-body {
+    background-color: #eef8fc;
+    background-image:
+        linear-gradient(180deg, #dbeafe 0%, #eef8fc 38%, #f0f9ff 100%);
+}
+
+html:not(.dark) .fi-sidebar,
+html:not(.dark) .fi-sidebar.fi-sidebar-open {
+    background: linear-gradient(180deg, #bae6fd 0%, #e0f2fe 42%, #ecfeff 100%);
+    border-inline-end: 1px solid rgba(14, 116, 144, 0.16);
+}
+
+html:not(.dark) .fi-topbar,
+html:not(.dark) .fi-header,
+html:not(.dark) .fi-body-has-topbar .fi-sidebar-header {
+    background: linear-gradient(90deg, #bae6fd, #e0f2fe 55%, #f0f9ff);
+    border-color: rgba(14, 116, 144, 0.12);
+}
+
+html:not(.dark) .fi-sidebar-item.fi-sidebar-item-has-url > .fi-sidebar-item-btn:hover,
+html:not(.dark) .fi-sidebar-item.fi-sidebar-item-has-url > .fi-sidebar-item-btn:focus-visible,
+html:not(.dark) .fi-sidebar-group-dropdown-trigger-btn:hover,
+html:not(.dark) .fi-sidebar-group-dropdown-trigger-btn:focus-visible,
+html:not(.dark) .fi-sidebar-database-notifications-btn:hover,
+html:not(.dark) .fi-sidebar-database-notifications-btn:focus-visible,
+html:not(.dark) .fi-topbar-item-btn:hover,
+html:not(.dark) .fi-topbar-item-btn:focus-visible {
+    background-color: #38bdf8;
+}
+
+html:not(.dark) .fi-sidebar-item.fi-sidebar-item-has-url > .fi-sidebar-item-btn:hover > .fi-sidebar-item-label,
+html:not(.dark) .fi-sidebar-item.fi-sidebar-item-has-url > .fi-sidebar-item-btn:focus-visible > .fi-sidebar-item-label,
+html:not(.dark) .fi-sidebar-item.fi-sidebar-item-has-url > .fi-sidebar-item-btn:hover > .fi-icon,
+html:not(.dark) .fi-sidebar-item.fi-sidebar-item-has-url > .fi-sidebar-item-btn:focus-visible > .fi-icon,
+html:not(.dark) .fi-topbar-item-btn:hover > .fi-topbar-item-label,
+html:not(.dark) .fi-topbar-item-btn:focus-visible > .fi-topbar-item-label {
+    color: #0c4a6e;
+}
+
+html:not(.dark) .fi-sidebar-item.fi-active > .fi-sidebar-item-btn,
+html:not(.dark) .fi-sidebar-item.fi-active > .fi-sidebar-item-btn:hover,
+html:not(.dark) .fi-topbar-item.fi-active .fi-topbar-item-btn {
+    background-color: #0ea5e9;
+}
+
+html:not(.dark) .fi-sidebar-item.fi-active > .fi-sidebar-item-btn > .fi-sidebar-item-label,
+html:not(.dark) .fi-sidebar-item.fi-active > .fi-sidebar-item-btn > .fi-icon,
+html:not(.dark) .fi-topbar-item.fi-active .fi-topbar-item-label,
+html:not(.dark) .fi-topbar-item.fi-active .fi-topbar-item-btn > .fi-icon {
+    color: #082f49;
+}
+
+html:not(.dark) .fi-tabs-item:hover,
+html:not(.dark) .fi-tabs-item:focus-visible,
+html:not(.dark) .fi-tabs-item.fi-active {
+    background-color: #38bdf8;
+}
+
+html:not(.dark) .fi-tabs-item:hover .fi-tabs-item-label,
+html:not(.dark) .fi-tabs-item:focus-visible .fi-tabs-item-label,
+html:not(.dark) .fi-tabs-item.fi-active .fi-tabs-item-label {
+    color: #082f49;
 }
 
 .fi-sidebar-header {

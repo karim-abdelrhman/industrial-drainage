@@ -91,7 +91,7 @@ class EditSample extends EditRecord
             $amount = number_format((float) $line['amount'], 2);
             $value = number_format((float) $line['detected_value'], 4).' '.$line['unit'];
             $note = htmlspecialchars($line['notes'] ?? '');
-            $nameCell = htmlspecialchars($line['pollutant_name']);
+            $nameCell = htmlspecialchars($line['pollutant_code']);
             if ($note !== '') {
                 $nameCell .= "<div style='color:#6b7280;font-size:12px;margin-top:2px'>{$note}</div>";
             }

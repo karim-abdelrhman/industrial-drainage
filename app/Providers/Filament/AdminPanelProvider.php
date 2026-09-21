@@ -35,6 +35,7 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('نظام الصرف الصناعي')
             ->brandLogo(asset('images/c14.png'))
             ->brandLogoHeight('3.25rem')
+            ->favicon(asset('images/c14.png'))
             ->font('Cairo', 'https://fonts.bunny.net/css?family=cairo:400,500,600,700&display=swap')
             ->darkMode()
             ->defaultThemeMode(ThemeMode::Light)
