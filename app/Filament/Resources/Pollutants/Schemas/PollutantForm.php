@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Pollutants\Schemas;
 
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -16,7 +15,7 @@ class PollutantForm
                 Section::make('المعلومات الأساسية')
                     ->collapsible()
                     ->collapsed(false)
-                    ->columns(2)
+                    ->columns(3)
                     ->schema([
                         TextInput::make('code')
                             ->label('الكود')
@@ -31,9 +30,6 @@ class PollutantForm
                             ->label('الوحدة')
                             ->default('مليجرام/لتر')
                             ->maxLength(30),
-                        Toggle::make('is_active')
-                            ->label('نشط')
-                            ->default(true),
                     ]),
             ])->columns(1);
     }

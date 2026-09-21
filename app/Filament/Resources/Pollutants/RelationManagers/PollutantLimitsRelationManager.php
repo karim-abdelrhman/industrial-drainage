@@ -13,6 +13,7 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
@@ -25,7 +26,7 @@ class PollutantLimitsRelationManager extends RelationManager
 {
     protected static string $relationship = 'limits';
 
-    protected static ?string $title = 'المطابقة';
+    protected static ?string $title = 'حدود المطابقة';
 
     protected static ?string $modelLabel = 'حد المطابقة';
 
@@ -42,59 +43,60 @@ class PollutantLimitsRelationManager extends RelationManager
                         ->options(collect(CustomerZone::cases())->mapWithKeys(fn (CustomerZone $c) => [$c->value => $c->getLabel()]))
                         ->required(),
 
-                    TextInput::make('min_value')
-                        ->label('الحد الأدنى')
-                        ->numeric()
-                        ->required(),
+                    Group::make([
+                        TextInput::make('min_value')
+                            ->label('الحد الأدنى')
+                            ->numeric()
+                            ->required(),
+                        InclusiveBoundToggles::lower('min_inclusive')->default(true),
+                    ]),
+                    Group::make([
+                        TextInput::make('max_value')
+                            ->label('الحد الأقصى (فارغ = مفتوح)')
+                            ->numeric()
+                            ->rules(
+                                fn (Get $get, ?Model $record): array => [
+                                    function (string $attribute, mixed $value, Closure $fail) use ($get, $record, $ownerRecord): void {
+                                        $minValue = (float) ($get('min_value') ?? 0);
+                                        $customerZone = $get('customer_zone');
 
-                    TextInput::make('max_value')
-                        ->label('الحد الأقصى (فارغ = مفتوح)')
-                        ->numeric()
-                        ->rules(
-                            fn (Get $get, ?Model $record): array => [
-                                function (string $attribute, mixed $value, Closure $fail) use ($get, $record, $ownerRecord): void {
-                                    $minValue = (float) ($get('min_value') ?? 0);
-                                    $customerZone = $get('customer_zone');
+                                        if ($value !== null && $value !== '' && (float) $value < $minValue) {
+                                            $fail('يجب أن يكون الحد الأقصى أكبر من أو يساوي الحد الأدنى.');
 
-                                    if ($value !== null && $value !== '' && (float) $value < $minValue) {
-                                        $fail('يجب أن يكون الحد الأقصى أكبر من أو يساوي الحد الأدنى.');
+                                            return;
+                                        }
 
-                                        return;
-                                    }
+                                        if (! $customerZone) {
+                                            return;
+                                        }
 
-                                    if (! $customerZone) {
-                                        return;
-                                    }
+                                        $candidate = new NumericInterval(
+                                            $minValue,
+                                            (bool) $get('min_inclusive'),
+                                            ($value !== null && $value !== '') ? (float) $value : null,
+                                            (bool) $get('max_inclusive'),
+                                        );
 
-                                    $candidate = new NumericInterval(
-                                        $minValue,
-                                        (bool) $get('min_inclusive'),
-                                        ($value !== null && $value !== '') ? (float) $value : null,
-                                        (bool) $get('max_inclusive'),
-                                    );
+                                        $overlaps = PollutantLimit::query()
+                                            ->where('pollutant_id', $ownerRecord->id)
+                                            ->where('customer_zone', $customerZone)
+                                            ->when($record?->id, fn ($query) => $query->where('id', '!=', $record->id))
+                                            ->get()
+                                            ->contains(fn (PollutantLimit $limit) => $limit->interval()->overlaps($candidate));
 
-                                    $overlaps = PollutantLimit::query()
-                                        ->where('pollutant_id', $ownerRecord->id)
-                                        ->where('customer_zone', $customerZone)
-                                        ->when($record?->id, fn ($query) => $query->where('id', '!=', $record->id))
-                                        ->get()
-                                        ->contains(fn (PollutantLimit $limit) => $limit->interval()->overlaps($candidate));
-
-                                    if ($overlaps) {
-                                        $fail('يوجد تداخل في نطاق القيم مع حد امتثال آخر لنفس الملوث ومنطقة العميل.');
-                                    }
-                                },
-                            ]
-                        ),
-
+                                        if ($overlaps) {
+                                            $fail('يوجد تداخل في نطاق القيم مع حد امتثال آخر لنفس الملوث ومنطقة العميل.');
+                                        }
+                                    },
+                                ]
+                            ),
+                        InclusiveBoundToggles::upper('max_inclusive')->default(true),
+                    ]),
                     TextInput::make('price_per_unit')
                         ->label('السعر / وحدة (ج.م)')
                         ->numeric()
                         ->minValue(0)
                         ->required(),
-
-                    InclusiveBoundToggles::lower('min_inclusive')->default(true),
-                    InclusiveBoundToggles::upper('max_inclusive')->default(true),
                 ]),
         ])->columns(1);
     }
