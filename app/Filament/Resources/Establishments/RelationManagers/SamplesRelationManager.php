@@ -63,16 +63,16 @@ class SamplesRelationManager extends RelationManager
                         ->default(SampleType::Regular->value)
                         ->required()
                         ->helperText('المركبة: 1400 ج.م — العادية: تبعًا لموقع المنشأة'),
-                    TextInput::make('collected_by')
-                        ->label('جُمعت بواسطة')
-                        ->maxLength(150),
+                    // TextInput::make('collected_by')
+                    //     ->label('جُمعت بواسطة')
+                    //     ->maxLength(150),
                     FileUpload::make('lab_report_image')
                         ->label('صورة تقرير المعمل')
                         ->image()
                         ->nullable()
                         ->columnSpanFull(),
                 ])
-                ->columns(2),
+                ->columns(4),
 
             Section::make('قراءات الملوثات')
                 ->schema([

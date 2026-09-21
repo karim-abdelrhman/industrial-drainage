@@ -8,7 +8,6 @@ use App\Filament\Resources\Samples\Pages\CreateSample;
 use App\Filament\Resources\Samples\Pages\EditSample;
 use App\Filament\Resources\Samples\Pages\ListSamples;
 use App\Filament\Resources\Samples\Pages\ViewSample;
-use App\Filament\Resources\Samples\RelationManagers\ReadingsRelationManager;
 use App\Filament\Resources\Samples\Schemas\SampleForm;
 use App\Filament\Resources\Samples\Schemas\SampleInfolist;
 use App\Filament\Resources\Samples\Tables\SamplesTable;
@@ -53,9 +52,7 @@ class SampleResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            ReadingsRelationManager::class,
-        ];
+        return [];
     }
 
     public static function getPages(): array
