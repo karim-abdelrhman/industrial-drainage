@@ -43,7 +43,7 @@ class EstablishmentForm
                             ->maxLength(300)
                             ->columnSpanFull(),
                     ])
-                    ->columns(2),
+                    ->columnSpan(2),
 
                 Section::make('بيانات التواصل')
                     ->schema([
@@ -60,7 +60,7 @@ class EstablishmentForm
                             ->maxLength(150),
 
                     ])
-                    ->columns(2),
-            ]);
+                    ->columnSpan(1),
+            ])->columns(3);
     }
 }

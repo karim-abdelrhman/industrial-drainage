@@ -7,6 +7,7 @@ use App\Enums\ViolationStatus;
 use App\Filament\Resources\Violations\Pages\CreateViolation;
 use App\Filament\Resources\Violations\Pages\EditViolation;
 use App\Filament\Resources\Violations\Pages\ListViolations;
+use App\Filament\Resources\Violations\Pages\ViewEstablishmentViolations;
 use App\Filament\Resources\Violations\Pages\ViewViolation;
 use App\Filament\Resources\Violations\Schemas\ViolationForm;
 use App\Filament\Resources\Violations\Schemas\ViolationInfolist;
@@ -58,6 +59,7 @@ class ViolationResource extends Resource
         return [
             'index' => ListViolations::route('/'),
             'create' => CreateViolation::route('/create'),
+            'establishment' => ViewEstablishmentViolations::route('/establishment/{record}'),
             'view' => ViewViolation::route('/{record}'),
             'edit' => EditViolation::route('/{record}/edit'),
         ];

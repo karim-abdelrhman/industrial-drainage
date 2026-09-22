@@ -5,7 +5,6 @@ namespace App\Filament\Widgets;
 use App\Enums\InvoiceStatus;
 use App\Enums\SampleStatus;
 use App\Enums\ViolationStatus;
-use App\Filament\Resources\Establishments\EstablishmentResource;
 use App\Filament\Resources\Invoices\InvoiceResource;
 use App\Filament\Resources\Samples\SampleResource;
 use App\Filament\Resources\Violations\ViolationResource;
@@ -113,7 +112,7 @@ class OperationalAlertsWidget extends Widget
                 'tone_label' => 'عاجل',
                 'title' => 'منشأة لديها مخالفات متكررة',
                 'meta' => $establishment->name.' — '.$establishment->active_violations_count.' مخالفات نشطة',
-                'url' => EstablishmentResource::getUrl('edit', ['record' => $establishment->id]),
+                'url' => ViolationResource::getUrl('establishment', ['record' => $establishment->id]),
             ];
         }
 

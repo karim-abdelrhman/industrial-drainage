@@ -93,7 +93,7 @@ class SamplesRelationManager extends RelationManager
                                 ->searchable()
                                 ->required(),
                             TextInput::make('detected_value')
-                                ->label('القيمة المرصودة')
+                                ->label('تركيز الملوث')
                                 ->numeric()
                                 ->minValue(0)
                                 ->required(),
